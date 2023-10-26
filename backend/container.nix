@@ -1,23 +1,37 @@
 { config, pkgs, ... }:
 
 let
-  agdapad-package = pkgs.callPackage ./package.nix {};
-  agdapad-static  = pkgs.callPackage ./static.nix {};
-  myttyd = (pkgs.callPackage ./ttyd/default.nix {}).overrideAttrs (oldAttrs: rec {
-    postPatch = ''
-      sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
-      sed -ie "s/Connection Closed/Connection closed/" html/src/components/terminal/index.tsx
-      sed -ie "s/document.title = data + ' | ' + this.title;/document.title = data;/" html/src/components/terminal/index.tsx
-   '';
-  });
+  agdapad-package = pkgs.callPackage ./package.nix { };
+  agdapad-static = pkgs.callPackage ./static.nix { };
+  myttyd = (pkgs.callPackage ./ttyd/default.nix { }).overrideAttrs
+    (oldAttrs: rec {
+      postPatch = ''
+        sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
+        sed -ie "s/Connection Closed/Connection closed/" html/src/components/terminal/index.tsx
+        sed -ie "s/document.title = data + ' | ' + this.title;/document.title = data;/" html/src/components/terminal/index.tsx
+      '';
+    });
   mydwm = pkgs.dwm.overrideAttrs (oldAttrs: rec {
     postPatch = ''
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
     '';
   });
-  myemacs = pkgs.emacs.pkgs.withPackages (epkgs: [ epkgs.polymode epkgs.markdown-mode epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow ]);
-  myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme epkgs.color-theme-sanityinc-tomorrow ]);
-  myagda = pkgs.agda.withPackages (p: [ p.standard-library p.cubical p.agda-categories ]);
+  myemacs = pkgs.emacs.pkgs.withPackages (epkgs: [
+    epkgs.polymode
+    epkgs.markdown-mode
+    epkgs.evil
+    epkgs.tramp-theme
+    epkgs.ahungry-theme
+    epkgs.color-theme-sanityinc-tomorrow
+  ]);
+  myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [
+    epkgs.evil
+    epkgs.tramp-theme
+    epkgs.ahungry-theme
+    epkgs.color-theme-sanityinc-tomorrow
+  ]);
+  myagda = pkgs.agda.withPackages
+    (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -49,9 +63,20 @@ in {
     description = "xprovisor";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart = "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${agdapad-package}/xprovisor.pl";
+      ExecStart =
+        "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${agdapad-package}/xprovisor.pl";
     };
-    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
+    path = with pkgs; [
+      bash
+      perl
+      coreutils
+      util-linux
+      xprintidle-ng
+      xdotool
+      netcat
+      gawk
+      procps
+    ];
   };
 
   systemd.services.xprovisor-maint = {
@@ -61,7 +86,17 @@ in {
       ExecStart = "${agdapad-package}/xprovisor.pl";
       Environment = "WEBSOCAT_URI=/?maintainance";
     };
-    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
+    path = with pkgs; [
+      bash
+      perl
+      coreutils
+      util-linux
+      xprintidle-ng
+      xdotool
+      netcat
+      gawk
+      procps
+    ];
   };
 
   systemd.timers.xprovisor-maint = {
@@ -75,9 +110,19 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       MemoryMax = "3G";
-      ExecStart = "${myttyd}/bin/ttyd -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
+      ExecStart =
+        "${myttyd}/bin/ttyd -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
     };
-    path = with pkgs; [ bash perl systemd util-linux coreutils shadow.su tmux myemacs-nox ];
+    path = with pkgs; [
+      bash
+      perl
+      systemd
+      util-linux
+      coreutils
+      shadow.su
+      tmux
+      myemacs-nox
+    ];
   };
 
   systemd.services.ttyprovisor-maint = {
@@ -86,7 +131,16 @@ in {
       Type = "oneshot";
       ExecStart = "${agdapad-package}/ttyprovisor.pl .maintainance";
     };
-    path = with pkgs; [ bash perl systemd util-linux coreutils shadow.su tmux myemacs-nox ];
+    path = with pkgs; [
+      bash
+      perl
+      systemd
+      util-linux
+      coreutils
+      shadow.su
+      tmux
+      myemacs-nox
+    ];
   };
 
   systemd.timers.ttyprovisor-maint = {
@@ -105,15 +159,31 @@ in {
       Environment = "WEBSOCAT_URI=/?terminate";
       TimeoutStartSec = "0";
     };
-    path = with pkgs; [ bash perl coreutils util-linux xprintidle-ng xdotool netcat gawk procps ];
+    path = with pkgs; [
+      bash
+      perl
+      coreutils
+      util-linux
+      xprintidle-ng
+      xdotool
+      netcat
+      gawk
+      procps
+    ];
   };
 
   services.openssh.enable = true;
   services.openssh.settings.PermitRootLogin = "yes";
 
-  users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
+  users.users.guest = {
+    isNormalUser = true;
+    description = "Guest";
+    home = "/home/guest";
+    uid = 10000;
+  };
 
-  systemd.services.nginx.serviceConfig.BindReadOnlyPaths = "/proc/loadavg:/loadavg";
+  systemd.services.nginx.serviceConfig.BindReadOnlyPaths =
+    "/proc/loadavg:/loadavg";
   services.nginx = {
     enable = true;
     recommendedGzipSettings = true;
@@ -158,19 +228,19 @@ in {
         "/index.html" = {
           root = agdapad-static;
           extraConfig = ''
-            expires 3h;
-#            set_by_lua_block $do_preconnect {
-#              local f = io.open("/loadavg")
-#              local line = f:read("*line")
-#              f:close()
-#              local l1 = string.match(line, "([%d]*%.[%d]*)%s")
-#              if tonumber(l1) >= 2 then
-#                return "0"
-#              else
-#                return "1"
-#              end
-#            }
-#            sub_filter '"__DO_PRECONNECT__"' $do_preconnect;
+                        expires 3h;
+            #            set_by_lua_block $do_preconnect {
+            #              local f = io.open("/loadavg")
+            #              local line = f:read("*line")
+            #              f:close()
+            #              local l1 = string.match(line, "([%d]*%.[%d]*)%s")
+            #              if tonumber(l1) >= 2 then
+            #                return "0"
+            #              else
+            #                return "1"
+            #              end
+            #            }
+            #            sub_filter '"__DO_PRECONNECT__"' $do_preconnect;
           '';
         };
         "/__tty" = {
@@ -181,16 +251,17 @@ in {
           proxyPass = "http://localhost:6080";
           proxyWebsockets = true;
         };
-        "~ ^/~(\\w+)(\\/.*)?$" = {  # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
-          alias = "/home/$1$2";
-          extraConfig = ''
-            expires epoch;
-            autoindex on;
-            dav_methods     PUT DELETE MKCOL COPY MOVE;
-            dav_ext_methods PROPFIND OPTIONS;
-            dav_access      user:rw group:rw all:r;
-          '';
-        };
+        "~ ^/~(\\w+)(\\/.*)?$" =
+          { # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
+            alias = "/home/$1$2";
+            extraConfig = ''
+              expires epoch;
+              autoindex on;
+              dav_methods     PUT DELETE MKCOL COPY MOVE;
+              dav_ext_methods PROPFIND OPTIONS;
+              dav_access      user:rw group:rw all:r;
+            '';
+          };
       };
     };
   };
@@ -199,91 +270,134 @@ in {
   systemd.services.nginx.serviceConfig.ProtectHome = "no";
 
   containers.xskeleton = {
-    config =
-      { config, pkgs, ... }:
-      {
-        services.journald.extraConfig = ''
-          Storage=volatile
-          RuntimeMaxUse=1M
-        '';
+    config = { config, pkgs, ... }: {
+      services.journald.extraConfig = ''
+        Storage=volatile
+        RuntimeMaxUse=1M
+      '';
 
-        time.hardwareClockInLocalTime = true;
+      time.hardwareClockInLocalTime = true;
 
-        networking.hostName = "ada";
-        networking.firewall.enable = false;
+      networking.hostName = "ada";
+      networking.firewall.enable = false;
 
-        hardware.pulseaudio.enable = true;
+      hardware.pulseaudio.enable = true;
 
-        environment.systemPackages = with pkgs; [
-          tigervnc myemacs myagda screenkey st mydwm netcat xosd
-        ];
+      environment.systemPackages = with pkgs; [
+        tigervnc
+        myemacs
+        myagda
+        screenkey
+        st
+        mydwm
+        netcat
+        xosd
+      ];
 
-        fonts.fontconfig.enable = true;
-        fonts.packages = with pkgs; [ hack-font ubuntu_font_family ];
+      fonts.fontconfig.enable = true;
+      fonts.fonts = with pkgs; [ hack-font ubuntu_font_family ];
 
-        programs.bash.enableCompletion = false;
+      programs.bash.enableCompletion = false;
 
-        users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
-
-        services.xserver = {
-          enable = true;
-          # desktopManager.xfce.enable = true;
-          displayManager.startx.enable = true;
-        };
-
-        systemd.services.vnc = {
-          wantedBy = [ "multi-user.target" ];
-          description = "vnc";
-          serviceConfig = {
-            User = "guest";
-            ExecStart = "${agdapad-package}/vncinit.sh";
-          };
-          postStop = "${agdapad-package}/vncdown.sh";
-          path = with pkgs; [ bash util-linux xorg.xauth tigervnc netcat coreutils mydwm myemacs ];
-        };
-
-        systemd.paths.poweroff = {
-          wantedBy = [ "multi-user.target" ];
-          description = "poweroff after VNC logout";
-          pathConfig = { PathExists = "/tmp/poweroff"; };
-        };
-
-        systemd.services.poweroff = {
-          description = "poweroff after VNC logout";
-          serviceConfig = { ExecStart = "${pkgs.systemd}/bin/poweroff"; };
-        };
+      users.users.guest = {
+        isNormalUser = true;
+        description = "Guest";
+        home = "/home/guest";
+        uid = 10000;
       };
+
+      services.xserver = {
+        enable = true;
+        # desktopManager.xfce.enable = true;
+        displayManager.startx.enable = true;
+      };
+
+      systemd.services.vnc = {
+        wantedBy = [ "multi-user.target" ];
+        description = "vnc";
+        serviceConfig = {
+          User = "guest";
+          ExecStart = "${agdapad-package}/vncinit.sh";
+        };
+        postStop = "${agdapad-package}/vncdown.sh";
+        path = with pkgs; [
+          bash
+          util-linux
+          xorg.xauth
+          tigervnc
+          netcat
+          coreutils
+          mydwm
+          myemacs
+        ];
+      };
+
+      systemd.paths.poweroff = {
+        wantedBy = [ "multi-user.target" ];
+        description = "poweroff after VNC logout";
+        pathConfig = { PathExists = "/tmp/poweroff"; };
+      };
+
+      systemd.services.poweroff = {
+        description = "poweroff after VNC logout";
+        serviceConfig = { ExecStart = "${pkgs.systemd}/bin/poweroff"; };
+      };
+
+      system.stateVersion = "23.05";
+    };
     ephemeral = true;
     privateNetwork = true;
-    bindMounts = { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; }; };
+    bindMounts = {
+      "/home/guest" = {
+        hostPath = "/home/.skeleton";
+        isReadOnly = false;
+      };
+    };
     extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 
   containers.ttyskeleton = {
-    config =
-      { config, pkgs, ... }:
-      {
-        services.journald.extraConfig = ''
-          Storage=volatile
-          RuntimeMaxUse=1M
-        '';
+    config = { config, pkgs, ... }: {
+      services.journald.extraConfig = ''
+        Storage=volatile
+        RuntimeMaxUse=1M
+      '';
 
-        time.hardwareClockInLocalTime = true;
+      time.hardwareClockInLocalTime = true;
 
-        networking.hostName = "ada";
-        networking.firewall.enable = false;
+      networking.hostName = "ada";
+      networking.firewall.enable = false;
 
-        environment.systemPackages = with pkgs; [
-          bash perl tmux vim myemacs-nox myagda
-        ];
+      environment.systemPackages = with pkgs; [
+        bash
+        perl
+        tmux
+        vim
+        myemacs-nox
+        myagda
+      ];
 
-        programs.bash.enableCompletion = false;
+      programs.bash.enableCompletion = false;
 
-        users.users.guest = { isNormalUser = true; description = "Guest"; home = "/home/guest"; uid = 10000; };
+      users.users.guest = {
+        isNormalUser = true;
+        description = "Guest";
+        home = "/home/guest";
+        uid = 10000;
       };
+
+      system.stateVersion = "23.05";
+    };
     ephemeral = true;
     privateNetwork = true;
-    bindMounts = { "/home/guest" = { hostPath = "/home/.skeleton"; isReadOnly = false; }; };
+    bindMounts = {
+      "/home/guest" = {
+        hostPath = "/home/.skeleton";
+        isReadOnly = false;
+      };
+    };
     extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
+
+  system.stateVersion = "23.05";
 }
