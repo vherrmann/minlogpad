@@ -60,9 +60,7 @@ of Linux will be forthcoming.
    stored, for instance `/minlogpad-homes`.
 2. Populate the directory `/minlogpad-homes/.skeleton` as you wish, for instance
    put exercise files there which you want to be available in every
-   session. This directory may also be empty, but it has to exist. If you want
-   the (copies of) the skeleton files to be writable by the guest users, give
-   them UID 995.
+   session. This directory may also be empty, but it has to exist.
 3. Add this to your `/etc/nixos/configuration.nix`:
 
        users.users.guest = { isNormalUser = true; description = "Guest"; home = "/minlogpad-homes"; uid = 995; };
