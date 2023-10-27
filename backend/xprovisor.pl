@@ -48,7 +48,7 @@ sub create_session {
     if mkdir /home/$session 2>/dev/null; then
       cp -Ta --reflink=auto /home/.skeleton /home/$session
       mkdir -p /home/$session/.session-name/$session
-      chown 10000 /home/$session
+      chown 995 /home/$session
     fi
     stat /home/$session >/dev/null || {
       echo '* Home directory for $session does not exist. Space issues?' >&2

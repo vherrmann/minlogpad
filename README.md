@@ -62,10 +62,10 @@ of Linux will be forthcoming.
    put exercise files there which you want to be available in every
    session. This directory may also be empty, but it has to exist. If you want
    the (copies of) the skeleton files to be writable by the guest users, give
-   them UID 10000.
+   them UID 995.
 3. Add this to your `/etc/nixos/configuration.nix`:
 
-       users.users.guest = { isNormalUser = true; description = "Guest"; home = "/minlogpad-homes"; uid = 10000; };
+       users.users.guest = { isNormalUser = true; description = "Guest"; home = "/minlogpad-homes"; uid = 995; };
        containers.box = {
          config =
            { config, pkgs, ... }:

@@ -172,18 +172,20 @@ in {
   services.openssh.enable = true;
   services.openssh.settings.PermitRootLogin = "yes";
 
+  users.groups.guest = { gid = 994; };
   users.users.guest = {
-    isNormalUser = true;
+    isSystemUser = true;
+    group = "guest";
     description = "Guest";
     home = "/home/guest";
-    uid = 10000;
+    uid = 995;
   };
 
   systemd.tmpfiles.rules = [
-    "C /home/.skeleton/examples 0750 10000 users - ${minlog-package}/share/doc/minlog/examples"
-    "d /home/.skeleton/doc/ 0750 10000 users - -"
-    "C /home/.skeleton/doc/tutor.pdf 0750 10000 users - ${minlog-package}/share/doc/minlog/tutor.pdf"
-    "C /home/.skeleton/doc/ref.pdf 0750 10000 users - ${minlog-package}/share/doc/minlog/ref.pdf"
+    "C /home/.skeleton/examples 0750 guest guest - ${minlog-package}/share/doc/minlog/examples"
+    "d /home/.skeleton/doc/ 0750 guest guest - -"
+    "C /home/.skeleton/doc/tutor.pdf 0750 guest guest - ${minlog-package}/share/doc/minlog/tutor.pdf"
+    "C /home/.skeleton/doc/ref.pdf 0750 guest guest - ${minlog-package}/share/doc/minlog/ref.pdf"
   ];
 
   systemd.services.nginx.serviceConfig.BindReadOnlyPaths =
@@ -304,11 +306,13 @@ in {
 
       environment.variables.MINLOGPATH = "${minlog-package}/share/minlog";
 
+      users.groups.guest = { gid = 994; };
       users.users.guest = {
-        isNormalUser = true;
+        isSystemUser = true;
+        group = "guest";
         description = "Guest";
         home = "/home/guest";
-        uid = 10000;
+        uid = 995;
       };
 
       system.stateVersion = "23.05";
