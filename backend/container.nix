@@ -19,22 +19,16 @@ let
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
     '';
   });
-  myemacs = pkgs.emacs.pkgs.withPackages (epkgs: [
-    epkgs.polymode
-    epkgs.markdown-mode
+  sharedEmacsPkgs = (epkgs: [
     epkgs.evil
     epkgs.tramp-theme
     epkgs.ahungry-theme
     epkgs.color-theme-sanityinc-tomorrow
     minlog-package
   ]);
-  myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [
-    epkgs.evil
-    epkgs.tramp-theme
-    epkgs.ahungry-theme
-    epkgs.color-theme-sanityinc-tomorrow
-    minlog-package
-  ]);
+  myemacs = pkgs.emacs.pkgs.withPackages
+    (epkgs: sharedEmacsPkgs epkgs ++ [ epkgs.polymode epkgs.markdown-mode ]);
+  myemacs-nox = pkgs.emacs-nox.pkgs.withPackages sharedEmacsPkgs;
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -272,8 +266,21 @@ in {
   # required so nginx can serve /~foo/bar.scm
   systemd.services.nginx.serviceConfig.ProtectHome = "no";
 
-  containers.xskeleton = {
-    config = { config, pkgs, ... }: {
+  containers = let
+    # config shared by xskeleton and ttyskeleton
+    sharedContainerConfig = {
+      ephemeral = true;
+      privateNetwork = true;
+      bindMounts = {
+        "/home/guest" = {
+          hostPath = "/home/.skeleton";
+          isReadOnly = false;
+        };
+      };
+      extraFlags = [ "--setenv=MINLOGPAD_SESSION_NAME=__SESSION_NAME__" ];
+    };
+    # config shared by xskeleton and ttyskeleton
+    sharedSystemConfig = { config, pkgs, ... }: {
       services.journald.extraConfig = ''
         Storage=volatile
         RuntimeMaxUse=1M
@@ -284,24 +291,11 @@ in {
       networking.hostName = "ada";
       networking.firewall.enable = false;
 
-      hardware.pulseaudio.enable = true;
-
-      environment.systemPackages = with pkgs; [
-        tigervnc
-        myemacs
-        minlog-package
-        chez
-        screenkey
-        st
-        mydwm
-        netcat
-        xosd
-      ];
-
-      fonts.fontconfig.enable = true;
-      fonts.fonts = with pkgs; [ hack-font ubuntu_font_family ];
-
       programs.bash.enableCompletion = false;
+
+      environment.systemPackages = with pkgs; [ chez ];
+
+      environment.variables.MINLOGPATH = "${minlog-package}/share/minlog";
 
       users.users.guest = {
         isNormalUser = true;
@@ -310,98 +304,77 @@ in {
         uid = 10000;
       };
 
-      services.xserver = {
-        enable = true;
-        # desktopManager.xfce.enable = true;
-        displayManager.startx.enable = true;
-      };
-
-      systemd.services.vnc = {
-        wantedBy = [ "multi-user.target" ];
-        description = "vnc";
-        serviceConfig = {
-          User = "guest";
-          ExecStart = "${minlogpad-package}/vncinit.sh";
-        };
-        postStop = "${minlogpad-package}/vncdown.sh";
-        path = with pkgs; [
+      system.stateVersion = "23.05";
+    };
+  in {
+    ttyskeleton = sharedContainerConfig // {
+      config = { config, pkgs, ... }: {
+        imports = [ sharedSystemConfig ];
+        environment.systemPackages = with pkgs; [
           bash
-          util-linux
-          xorg.xauth
-          tigervnc
-          netcat
-          coreutils
-          mydwm
-          myemacs
+          perl
+          tmux
+          vim
+          myemacs-nox
         ];
       };
-
-      systemd.paths.poweroff = {
-        wantedBy = [ "multi-user.target" ];
-        description = "poweroff after VNC logout";
-        pathConfig = { PathExists = "/tmp/poweroff"; };
-      };
-
-      systemd.services.poweroff = {
-        description = "poweroff after VNC logout";
-        serviceConfig = { ExecStart = "${pkgs.systemd}/bin/poweroff"; };
-      };
-
-      system.stateVersion = "23.05";
     };
-    ephemeral = true;
-    privateNetwork = true;
-    bindMounts = {
-      "/home/guest" = {
-        hostPath = "/home/.skeleton";
-        isReadOnly = false;
-      };
-    };
-    extraFlags = [ "--setenv=MINLOGPAD_SESSION_NAME=__SESSION_NAME__" ];
-  };
+    xskeleton = sharedContainerConfig // {
+      config = { config, pkgs, ... }: {
+        imports = [ sharedSystemConfig ];
+        hardware.pulseaudio.enable = true;
 
-  containers.ttyskeleton = {
-    config = { config, pkgs, ... }: {
-      services.journald.extraConfig = ''
-        Storage=volatile
-        RuntimeMaxUse=1M
-      '';
+        environment.systemPackages = with pkgs; [
+          tigervnc
+          myemacs
+          screenkey
+          st
+          mydwm
+          netcat
+          xosd
+        ];
 
-      time.hardwareClockInLocalTime = true;
+        fonts.fontconfig.enable = true;
+        fonts.fonts = with pkgs; [ hack-font ubuntu_font_family ];
 
-      networking.hostName = "ada";
-      networking.firewall.enable = false;
+        services.xserver = {
+          enable = true;
+          # desktopManager.xfce.enable = true;
+          displayManager.startx.enable = true;
+        };
 
-      environment.systemPackages = with pkgs; [
-        bash
-        perl
-        tmux
-        vim
-        myemacs-nox
-        minlog-package
-        chez
-      ];
+        systemd.services.vnc = {
+          wantedBy = [ "multi-user.target" ];
+          description = "vnc";
+          serviceConfig = {
+            User = "guest";
+            ExecStart = "${minlogpad-package}/vncinit.sh";
+          };
+          postStop = "${minlogpad-package}/vncdown.sh";
+          path = with pkgs; [
+            bash
+            util-linux
+            xorg.xauth
+            tigervnc
+            netcat
+            coreutils
+            mydwm
+            myemacs
+          ];
+        };
 
-      programs.bash.enableCompletion = false;
+        systemd.paths.poweroff = {
+          wantedBy = [ "multi-user.target" ];
+          description = "poweroff after VNC logout";
+          pathConfig = { PathExists = "/tmp/poweroff"; };
+        };
 
-      users.users.guest = {
-        isNormalUser = true;
-        description = "Guest";
-        home = "/home/guest";
-        uid = 10000;
-      };
-
-      system.stateVersion = "23.05";
-    };
-    ephemeral = true;
-    privateNetwork = true;
-    bindMounts = {
-      "/home/guest" = {
-        hostPath = "/home/.skeleton";
-        isReadOnly = false;
+        systemd.services.poweroff = {
+          description = "poweroff after VNC logout";
+          serviceConfig = { ExecStart = "${pkgs.systemd}/bin/poweroff"; };
+        };
       };
     };
-    extraFlags = [ "--setenv=MINLOGPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 
   system.stateVersion = "23.05";
