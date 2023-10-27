@@ -24,6 +24,9 @@ let
     epkgs.tramp-theme
     epkgs.ahungry-theme
     epkgs.color-theme-sanityinc-tomorrow
+    epkgs.pdf-tools
+    epkgs.which-key
+    epkgs.undo-fu
     minlog-package
   ]);
   myemacs = pkgs.emacs.pkgs.withPackages

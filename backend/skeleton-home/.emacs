@@ -21,10 +21,25 @@
 
 (run-with-idle-timer 60 t (lambda () (save-some-buffers t nil)))
 
+(setq evil-toggle-key "M-o")
 (require 'evil)
 (setq evil-default-state 'emacs)
 (setq evil-want-fine-undo 't)
 (evil-mode 1)
+
+(require 'which-key)
+(which-key-mode)
+
+(require 'pdf-tools)
+(pdf-tools-install-noverify)
+(add-hook 'pdf-view-mode-hook
+          (lambda ()
+            (blink-cursor-mode -1)))
+
+(require 'undo-fu)
+(global-unset-key (kbd "C-z"))
+(global-set-key (kbd "C-z")   'undo-fu-only-undo)
+(global-set-key (kbd "C-S-z") 'undo-fu-only-redo)
 
 ;; adapted from minlog source
 (defun run-minlog (&optional filename)

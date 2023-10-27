@@ -24,7 +24,9 @@
 
 ;; C-x C-f          find file
 
-;; C-z              enable Vi keybindings
+;; C-z              undo
+;; C-S-z            redo
+;; M-o              toggle Vi keybindings
 ;; C-x C-+          increase font size
 
 ;; "C-c" means "<Ctrl key> + c". In case your browser is intercepting C-c,
