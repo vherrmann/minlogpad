@@ -1,8 +1,11 @@
+{ inputs, ... }:
 { config, pkgs, ... }:
 
 let
-  agdapad-package = pkgs.callPackage ./package.nix { };
-  agdapad-static = pkgs.callPackage ./static.nix { };
+  minlogpad-package = pkgs.callPackage ./package.nix { };
+  minlogpad-static = pkgs.callPackage ./static.nix { };
+  minlog-package =
+    pkgs.callPackage (import ./minlog.nix { inherit (inputs) minlogSrc; }) { };
   myttyd = (pkgs.callPackage ./ttyd/default.nix { }).overrideAttrs
     (oldAttrs: rec {
       postPatch = ''
@@ -23,15 +26,15 @@ let
     epkgs.tramp-theme
     epkgs.ahungry-theme
     epkgs.color-theme-sanityinc-tomorrow
+    minlog-package
   ]);
   myemacs-nox = pkgs.emacs-nox.pkgs.withPackages (epkgs: [
     epkgs.evil
     epkgs.tramp-theme
     epkgs.ahungry-theme
     epkgs.color-theme-sanityinc-tomorrow
+    minlog-package
   ]);
-  myagda = pkgs.agda.withPackages
-    (p: [ p.standard-library p.cubical p.agda-categories ]);
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -64,7 +67,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       ExecStart =
-        "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${agdapad-package}/xprovisor.pl";
+        "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${minlogpad-package}/xprovisor.pl";
     };
     path = with pkgs; [
       bash
@@ -83,7 +86,7 @@ in {
     description = "xmaint";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${agdapad-package}/xprovisor.pl";
+      ExecStart = "${minlogpad-package}/xprovisor.pl";
       Environment = "WEBSOCAT_URI=/?maintainance";
     };
     path = with pkgs; [
@@ -111,7 +114,7 @@ in {
     serviceConfig = {
       MemoryMax = "3G";
       ExecStart =
-        "${myttyd}/bin/ttyd -b /__tty -a ${agdapad-package}/ttyprovisor.pl";
+        "${myttyd}/bin/ttyd -b /__tty -a ${minlogpad-package}/ttyprovisor.pl";
     };
     path = with pkgs; [
       bash
@@ -129,7 +132,7 @@ in {
     description = "ttymaint";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${agdapad-package}/ttyprovisor.pl .maintainance";
+      ExecStart = "${minlogpad-package}/ttyprovisor.pl .maintainance";
     };
     path = with pkgs; [
       bash
@@ -155,7 +158,7 @@ in {
     wantedBy = [ "shutdown.target" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${agdapad-package}/xprovisor.pl";
+      ExecStart = "${minlogpad-package}/xprovisor.pl";
       Environment = "WEBSOCAT_URI=/?terminate";
       TimeoutStartSec = "0";
     };
@@ -190,7 +193,7 @@ in {
     recommendedOptimisation = true;
 
     user = "guest";
-    # so nginx can serve /~foo/bar.agda (also read-write using DAV)
+    # so nginx can serve /~foo/bar.scm (also read-write using DAV)
 
     package = pkgs.nginxMainline.override {
       modules = with pkgs.nginxModules; [ brotli dav develkit moreheaders ];
@@ -206,27 +209,27 @@ in {
     commonHttpConfig = ''
       brotli on;
       brotli_static on;
-      brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/html text/javascript text/plain text/xml text/x-agda text/x-scheme;
+      brotli_types application/json application/javascript application/xml application/xml+rss image/svg+xml text/css text/html text/javascript text/plain text/xml text/haskell text/x-scheme;
       types {
-        text/x-agda   agda lagda;
         text/x-scheme scm rkt;
+        text/haskell hs;
         text/x-asm    s;
       }
       charset utf-8;
-      charset_types text/x-agda text/x-scheme text/x-asm;
+      charset_types text/haskell text/x-scheme text/x-asm;
       dav_ext_lock_zone zone=foo:10m;
     '';
 
     virtualHosts.localhost = {
       locations = {
         "/" = {
-          root = agdapad-static;
+          root = minlogpad-static;
           extraConfig = ''
             expires 7d;
           '';
         };
         "/index.html" = {
-          root = agdapad-static;
+          root = minlogpad-static;
           extraConfig = ''
                         expires 3h;
             #            set_by_lua_block $do_preconnect {
@@ -266,7 +269,7 @@ in {
     };
   };
 
-  # required so nginx can serve /~foo/bar.agda
+  # required so nginx can serve /~foo/bar.scm
   systemd.services.nginx.serviceConfig.ProtectHome = "no";
 
   containers.xskeleton = {
@@ -286,7 +289,8 @@ in {
       environment.systemPackages = with pkgs; [
         tigervnc
         myemacs
-        myagda
+        minlog-package
+        chez
         screenkey
         st
         mydwm
@@ -317,9 +321,9 @@ in {
         description = "vnc";
         serviceConfig = {
           User = "guest";
-          ExecStart = "${agdapad-package}/vncinit.sh";
+          ExecStart = "${minlogpad-package}/vncinit.sh";
         };
-        postStop = "${agdapad-package}/vncdown.sh";
+        postStop = "${minlogpad-package}/vncdown.sh";
         path = with pkgs; [
           bash
           util-linux
@@ -353,7 +357,7 @@ in {
         isReadOnly = false;
       };
     };
-    extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
+    extraFlags = [ "--setenv=MINLOGPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 
   containers.ttyskeleton = {
@@ -374,7 +378,8 @@ in {
         tmux
         vim
         myemacs-nox
-        myagda
+        minlog-package
+        chez
       ];
 
       programs.bash.enableCompletion = false;
@@ -396,7 +401,7 @@ in {
         isReadOnly = false;
       };
     };
-    extraFlags = [ "--setenv=AGDAPAD_SESSION_NAME=__SESSION_NAME__" ];
+    extraFlags = [ "--setenv=MINLOGPAD_SESSION_NAME=__SESSION_NAME__" ];
   };
 
   system.stateVersion = "23.05";

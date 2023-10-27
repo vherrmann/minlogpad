@@ -1,8 +1,8 @@
 [Desktop Entry]
 Type=Application
-Name=emacs-agda
+Name=emacs-minlog
 Comment=
-Exec=emacs hello.agda
+Exec=emacs hello.scm
 StartupNotify=false
 Terminal=false
 Hidden=false

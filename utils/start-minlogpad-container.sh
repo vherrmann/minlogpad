@@ -49,8 +49,8 @@ EOF
 
 chmod +x sbin/init
 
-systemd-nspawn -n --bind-ro=/nix/store --bind-ro=/nix/var/nix/db --bind="$home":/home --boot -M agdapad -xD "$dir" &
+systemd-nspawn -n --bind-ro=/nix/store --bind-ro=/nix/var/nix/db --bind="$home":/home --boot -M minlogpad -xD "$dir" &
 
 # uff, not very nice
 sleep 1
-ifconfig ve-agdapad $hostip up
+ifconfig ve-minlogpad $hostip up

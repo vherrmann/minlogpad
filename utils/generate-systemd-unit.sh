@@ -37,7 +37,7 @@ cat > $dir/configuration.nix <<EOF
   boot.enableContainers = true;
   boot.isContainer = true;
 
-  containers.agdapad = {
+  containers.minlogpad = {
     config =
       { config, pkgs, ... }:
       { imports = [ $PWD/container.nix ];
@@ -54,4 +54,4 @@ EOF
 
 system=$(nix-build "<nixpkgs/nixos>" -I nixos-config=$dir/configuration.nix -A system)
 
-sed -e "s+/etc/containers/+$system/etc/containers/+" -e "s+%i+agdapad+g" < $system/etc/systemd/system/container@agdapad.service
+sed -e "s+/etc/containers/+$system/etc/containers/+" -e "s+%i+minlogpad+g" < $system/etc/systemd/system/container@minlogpad.service

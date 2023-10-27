@@ -4,8 +4,8 @@
 { config, lib, pkgs, ... }:
 
 let
-  agdapad-package = pkgs.callPackage ./package.nix {};
-  slimAgda = pkgs.callPackage ./slim-agda.nix {};
+  minlogpad-package = pkgs.callPackage ./package.nix { };
+  minlog-package = pkgs.callPackage ./minlog.nix { };
 in {
   imports = [
     <nixpkgs/nixos/modules/installer/cd-dvd/installation-cd-minimal.nix>
@@ -19,7 +19,8 @@ in {
   boot.kernel.sysctl = { "vm.dirty_writeback_centisecs" = 6000; };
   boot.kernelPackages = pkgs.linuxPackages_latest;
   boot.loader.timeout = lib.mkForce 2;
-  boot.supportedFilesystems = lib.mkForce [ "btrfs" "ext4" "vfat" "ntfs" "cifs" ];
+  boot.supportedFilesystems =
+    lib.mkForce [ "btrfs" "ext4" "vfat" "ntfs" "cifs" ];
 
   isoImage.appendToMenuLabel = " Live System";
 
@@ -36,9 +37,16 @@ in {
   fonts.fontconfig.enable = lib.mkForce true;
 
   environment.systemPackages = with pkgs; [
-    bash vim firefoxWrapper sshfs git screen socat
-    (emacsWithPackages (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]))
-    (slimAgda)
+    bash
+    vim
+    firefoxWrapper
+    sshfs
+    git
+    screen
+    socat
+    (emacsWithPackages
+      (epkgs: [ epkgs.evil epkgs.tramp-theme epkgs.ahungry-theme ]))
+    minlog-package
   ];
 
   fonts.fonts = with pkgs; [ ubuntu_font_family ];
@@ -49,14 +57,15 @@ in {
     createHome = true;
     home = "/home/ada";
     uid = 1000;
-    initialHashedPassword = "$6$utLZPDNys$nxpqRBobo7NAi9kFs7J8Ar5UN2zJY97.tuavJyk1ACyVoELeUwS3AtU7eCPq.R3Yxtb3GvmpuOuH0xrww0pdp.";
+    initialHashedPassword =
+      "$6$utLZPDNys$nxpqRBobo7NAi9kFs7J8Ar5UN2zJY97.tuavJyk1ACyVoELeUwS3AtU7eCPq.R3Yxtb3GvmpuOuH0xrww0pdp.";
   };
 
   boot.postBootCommands = ''
     cd /home/ada
-    cp --no-preserve=mode -nrT ${agdapad-package}/skeleton-home .
+    cp --no-preserve=mode -nrT ${minlogpad-package}/skeleton-home .
     mkdir -p /home/ada/.config/autostart
-    ln -s ${agdapad-package}/emacs-agda.desktop /home/ada/.config/autostart/
+    ln -s ${minlogpad-package}/emacs-minlog.desktop /home/ada/.config/autostart/
     chown -R ada.users .
   '';
 

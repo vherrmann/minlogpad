@@ -1,7 +1,7 @@
-{ lib, stdenv }:  
+{ lib, stdenv }:
 
 stdenv.mkDerivation rec {
-  name = "agdapad-static"; 
+  name = "minlogpad-static";
   src = ../frontend;
 
   installPhase = ''

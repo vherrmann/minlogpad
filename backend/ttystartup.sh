@@ -7,5 +7,5 @@ cd /home/guest
 
 cp --reflink=auto --no-preserve=mode -nrT @out@/skeleton-home .
 
-echo -en "\033]0;$1 | Agdapad\007"
-exec tmux new-session -A -s fun -- emacs hello.agda
+echo -en "\033]0;$1 | Minlogpad\007"
+exec tmux new-session -A -s fun -- emacs hello.scm

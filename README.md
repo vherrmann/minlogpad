@@ -1,6 +1,8 @@
-# Agdapad
+# Minlogpad
+Forked from Ingo Blechschmidt's excellent [Minlogpad](https://github.com/iblech/agdapad).
 
-**Live demo at https://agdapad.quasicoherent.io/.**
+**Live demo at https://minlogpad.valentin-herrmann.de/.**
+
 
 
 ## Features
@@ -9,7 +11,7 @@
 * Hot spares for fresh sessions (with emacs already prestarted)
 * Cold spares for already existing sessions (with X, but not emacs, already
   prestarted)
-* Robust container acquisition – people accessing the same Agdapad URL
+* Robust container acquisition – people accessing the same Minlogpad URL
   will be connected to the same session even in case of bad timing
 * Löb-like nested containers
 * WebDAV access to user files for easy up- and downloading
@@ -54,26 +56,26 @@ of Linux will be forthcoming.
 
 ### Instructions for a permanent setup
 
-1. Create a directory in which the homes of all Agdapad sessions will be
-   stored, for instance `/agdapad-homes`.
-2. Populate the directory `/agdapad-homes/.skeleton` as you wish, for instance
+1. Create a directory in which the homes of all Minlogpad sessions will be
+   stored, for instance `/minlogpad-homes`.
+2. Populate the directory `/minlogpad-homes/.skeleton` as you wish, for instance
    put exercise files there which you want to be available in every
    session. This directory may also be empty, but it has to exist. If you want
    the (copies of) the skeleton files to be writable by the guest users, give
    them UID 10000.
 3. Add this to your `/etc/nixos/configuration.nix`:
 
-       users.users.guest = { isNormalUser = true; description = "Guest"; home = "/agdapad-homes"; uid = 10000; };
+       users.users.guest = { isNormalUser = true; description = "Guest"; home = "/minlogpad-homes"; uid = 10000; };
        containers.box = {
          config =
            { config, pkgs, ... }:
-           { imports = [ /tmp-iblech/agdapad/backend/container.nix ]; };
+           { imports = [ /tmp/minlogpad/backend/container.nix ]; };
          ephemeral = true;
          autoStart = true;
          privateNetwork = true;
          hostAddress = "192.168.0.1";
          localAddress = "192.168.0.2";
-         bindMounts = { "/home" = { hostPath = "/agdapad-homes"; isReadOnly = false; }; };
+         bindMounts = { "/home" = { hostPath = "/minlogpad-homes"; isReadOnly = false; }; };
        };
 4. Switch to the new configuration.
 
@@ -92,7 +94,7 @@ traffic (including https traffic) to the host to the container.
     server {
         listen 0.0.0.0:80;
         listen [::]:80;
-        server_name agdapad.quasicoherent.io;
+        server_name minlogpad.valentin-herrmann.de;
         location /.well-known/acme-challenge {
             root /var/lib/acme/acme-challenge;
             auth_basic off;
@@ -105,14 +107,14 @@ traffic (including https traffic) to the host to the container.
     server {
         listen 0.0.0.0:443 ssl http2;
         listen [::]:443 ssl http2;
-        server_name agdapad.quasicoherent.io;
+        server_name minlogpad.valentin-herrmann.de;
         location /.well-known/acme-challenge {
             root /var/lib/acme/acme-challenge;
             auth_basic off;
         }
-        ssl_certificate /var/lib/acme/agdapad.quasicoherent.io/fullchain.pem;
-        ssl_certificate_key /var/lib/acme/agdapad.quasicoherent.io/key.pem;
-        ssl_trusted_certificate /var/lib/acme/agdapad.quasicoherent.io/chain.pem;
+        ssl_certificate /var/lib/acme/minlogpad.valentin-herrmann.de/fullchain.pem;
+        ssl_certificate_key /var/lib/acme/minlogpad.valentin-herrmann.de/key.pem;
+        ssl_trusted_certificate /var/lib/acme/minlogpad.valentin-herrmann.de/chain.pem;
         location / {
             proxy_pass http://192.168.0.2;
             proxy_http_version 1.1;
@@ -134,7 +136,7 @@ to `/etc/nixos/configuration.nix`.
          proxy_read_timeout 600;
          proxy_http_version 1.1;
       '';
-      virtualHosts."agdapad.quasicoherent.io" = {
+      virtualHosts."minlogpad.valentin-herrmann.de" = {
         forceSSL = true;
         enableACME = true;
         locations."/" = {
@@ -183,4 +185,4 @@ to `/etc/nixos/configuration.nix`.
 * system image for offline work
 * ssh access
 * document viewonly mode
-* document `/~foo/bar.agda` http read-only access and read-write access using WebDAV
+* document `/~foo/bar.scm` http read-only access and read-write access using WebDAV

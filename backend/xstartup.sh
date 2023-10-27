@@ -25,7 +25,7 @@ done | osd_cat -l 1 -d 1 -c purple -A right -p top &
 
 [ -x .xstartup ] && . .xstartup
 
-if [ "${AGDAPAD_SESSION_NAME:0:5}" = "full-" ]; then
+if [ "${MINLOGPAD_SESSION_NAME:0:5}" = "full-" ]; then
   # launch a full desktop environment
   eval $(dbus-launch --exit-with-session --sh-syntax)
   systemctl --user import-environment DISPLAY XAUTHORITY
@@ -33,5 +33,5 @@ if [ "${AGDAPAD_SESSION_NAME:0:5}" = "full-" ]; then
   exec xfce4-session
 else
   dwm &
-  exec emacs --fullscreen hello.agda
+  exec emacs --fullscreen hello.scm
 fi

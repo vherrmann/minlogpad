@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>Agdapad</title>
+    <title>Minlogpad</title>
 
     <meta charset="utf-8">
 
@@ -114,7 +114,7 @@
             }
 
             document.location.hash = "#" + sessionName;
-            document.title = sessionName + " | Agdapad";
+            document.title = sessionName + " | Minlogpad";
             screen.style.opacity = "1";
 
             // We focus the RFB in the connect handler only if the info area is
@@ -332,12 +332,12 @@
         }
     </script>
 
-    <div class="logo"><img src="images/hen.svg" loading="lazy" width="425" height="332" alt="Agdapad"></div>
+    <div class="logo"><img src="images/hen.svg" loading="lazy" width="425" height="332" alt="Minlogpad"></div>
 
     <div class="start">
-        <button id="button">New Agda session</button>
+        <button id="button">New Minlog session</button>
 
-        <label id="label" for="padname">or create/open Agda session with name:</label>
+        <label id="label" for="padname">or create/open Minlog session with name:</label>
         <form id="nameform">
             <input type="text" id="padname" maxlength="50">&nbsp;<button type="submit">Ok</button>
         </form>
@@ -352,15 +352,15 @@
     </div>
 
     <div class="logos">
-        <p><a href="https://wiki.portal.chalmers.se/agda/">Agda</a> is a
-        dependently typed functional programming language and a proof
-        assistant.
+        <p><a href="https://www.mathematik.uni-muenchen.de/~logik/minlog/index.php">Minlog</a>
+        is an interactive proof system based on first order natural deduction calculus.
         You can also use a <a href="#__native">native VNC viewer</a> instead of
         this in-browser viewer. <strong><a href="#__info">Learn more about this
         project.</a></strong>
-        This online version of Agda was made by <a
-        href="https://www.ingo-blechschmidt.eu/">Ingo Blechschmidt</a> for an
-        Agda course at the <a href="https://www.unipd.it/en/dm">University of Padova</a>,
+        This online version of Minlog is served to you by <a href="https://valentin-herrmann.de/">
+        Valentin Herrmann </a> and based of the excellent <a href="https://agdapad.quasicoherent.io/">
+        Agdapad </a>, which was made by <a href="https://www.ingo-blechschmidt.eu/">Ingo Blechschmidt</a>
+        for an Agda course at the <a href="https://www.unipd.it/en/dm">University of Padova</a>,
         building on awesome free technology:</p>
         <a href="https://www.linux.org/"><img loading="lazy" src="images/logos/linux.svg" alt="Linux"></a>
         <a href="https://www.gnu.org/"><img loading="lazy" src="images/logos/gnu.svg" alt="GNU"></a>
@@ -373,61 +373,49 @@
     </div>
 
     <div id="__info" class="subpage">
-        <h2>About Agdapad</h2>
+        <h2>About Minlogpad</h2>
         <p>This page connects you to a remote server on which an Emacs
-        instance is spawned for you. The purpose of Agdapad is to lower the bar
-        for playing with Agda and its standard library, as local installation becomes superfluous, and
-        to allow live collaboration on small Agda projects. Agdapad was built
+        instance is spawned for you. The purpose of Minlogpad is to lower the bar
+        for using Minlog, as local installation becomes superfluous, and
+        to allow live collaboration on small Minlog projects. Minlogpad is forked from
+        <a href="https://agdapad.quasicoherent.io/"> Agdapad </a>, which was built
         to facilitate an Agda course at the <a
         href="https://www.unipd.it/en/dm">University of Padova</a>.</p>
 
-        <p>Versions installed on the server: Agda 2.6.3, standard-library 1.7.2,
-        cubical 0.5-6b1ce0, agda-categories 0.1.7.1a</p>
+        <p>Versions installed on the server: Minlog commit 4a9a1e4</p>
 
         <h2>Server concerns</h2>
         <p>In case of connection problems, try reloading the page. You will be
         able to continue where you left off.</p>
         <p>The server is not very well-equipped, hence please be mindful of
         your resource usage. You do not need to quit Emacs when leaving this
-        page, but please do terminate Agda or quit Emacs in case Agda is taking
+        page, but please do terminate Minlog or quit Emacs in case Minlog is taking
         an extraordinate amount of time.</p>
         <p>This service is provided free of charge and comes without any guarantees.
-        It might vanish at any point. Your Agda programs are stored on the
+        It might vanish at any point. Your Minlog programs are stored on the
         server, unencrypted, but no personal identifying data is recorded. Please <a
-        href="mailto:iblech@speicherleck.de">notify me</a> with any security
+        href="mailto:minlogpad@valentin-herrmann.de">notify me</a> with any security
         concerns you discover.</p>
         <p>A NixOS package for self-hosting this server <a
-        href="https://www.github.com/iblech/agdapad">is available here</a>
+        href="https://www.github.com/vherrmann/minlogpad">is available here</a>
         (AGPL-licensed). You can also access this
         server <a href="#__native">using a native VNC viewer</a>.</p>
 
-        <h2>Installing Agda on your local computer</h2>
-        <p>For larger experiments, Agda is more fun if you install it locally
+        <h2>Installing Minlog on your local computer</h2>
+        <p>For larger experiments, Minlog is more fun if you install it locally
         on your computer. Instructions are available <a
-        href="https://agda.readthedocs.io/en/latest/getting-started/index.html">at
-        the Agda wiki</a>. Unfortunately the installation process it not
-        entirely straightforward, especially on Windows. For this reason you
-        can also download an “all batteries included” <a
-        href="https://www.ingo-blechschmidt.eu/agda-small.iso">system image</a>
-        (1.2 GiB, also see 0.9 GiB <a href="https://www.ingo-blechschmidt.eu/agda-minimal.iso">minimal
-        image</a> without Firefox and with less firmware) and run it as a
-        virtual machine using, for instance, <a
-        href="https://www.virtualbox.org/wiki/Downloads">VirtualBox</a>. Albeit
-        a bit heavy, this is a fast way to get going.</p>
+        href="https://www.mathematik.uni-muenchen.de/~logik/minlog/index.php#installation">on the
+        official page</a>.
 
         <h2>Contact</h2>
-        <p>Ingo Blechschmidt<br>
-        <a href="mailto:iblech@speicherleck.de">iblech@speicherleck.de</a><br>
-        <a href="tel:+4917695110311">+49 176 95110311</a><br>
-        Arberstr. 5<br>
-        86179 Augsburg<br>
-        Germany</p>
+        <p>Valentin Herrmann<br>
+        <a href="mailto:minlogpad@valentin-herrmann.de">minlogpad@valentin-herrmann.de</a><br>
       </div>
 
     <div id="__native" class="subpage">
         <h2>Using a native VNC viewer</h2>
         <p>Simply direct your favorite VNC viewer to the address
-        <code>wss://<span id="hostname1">agdapad.quasicoherent.io</span>/__vnc/<em>SessionName</em></code>.</p>
+        <code>wss://<span id="hostname1">minlogpad.valentin-herrmann.de</span>/__vnc/<em>SessionName</em></code>.</p>
         <p>However, most
         VNC clients do not support the WebSocket protocol, the <a
         href="https://novnc.com/">noVNC client</a> being a notable
@@ -436,7 +424,7 @@
         Linux distributions) can do this for you:</p>
         <ol>
             <li>Run <code>websocat --binary tcp-l:127.0.0.1:5901
-            wss://<span id="hostname2">agdapad.quasicoherent.io</span>/__vnc/<em>SessionName</em></code>.</li>
+            wss://<span id="hostname2">minlogpad.valentin-herrmann.de</span>/__vnc/<em>SessionName</em></code>.</li>
             <li>Direct your VNC viewer to <code>localhost:1</code>.</li>
         </ol>
     </div>
