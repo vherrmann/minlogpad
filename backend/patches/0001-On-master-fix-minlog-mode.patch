@@ -1,0 +1,28 @@
+diff --git a/Makefile b/Makefile
+index f6af7bd..587cc48 100644
+--- a/Makefile
++++ b/Makefile
+@@ -34,11 +34,12 @@ all: src init.scm minlog util/minlog.el doc
+ 
+ install: src init.scm minlog util/minlog.el doc
+ 	$(INSTALL_DIR) $(PREFIX)$(MINLOGDIR) $(PREFIX)$(BINDIR) $(PREFIX)$(ELDIR)
+-	sed "s%---MINLOGPATH---%"$(MINLOGDIR)"%g; s%---MINLOGELPATH---%"$(ELDIR)"%g" < util/minlog.template.el > $(PREFIX)$(ELDIR)/minlog.el
++	sed "s%---MINLOGPATH---%"$(MINLOGDIR)"%g; s%---MINLOGELPATH---%"$(ELDIR)"%g" < util/minlog.template.el > util/minlog.el
+ 	sed "s%---MINLOGPATH---%"$(ELDIR)"%g" < util/minlog.template > $(PREFIX)$(BINDIR)/minlog
+ 	chmod a+x $(PREFIX)$(BINDIR)/minlog
+ 	sed "s%---MINLOGPATH---%"$(MINLOGDIR)"%g; s%(minlog-load \"examples/\" path))%(load (string-append \""$(DOCDIR)"/examples/\" path)))%g" < src/init.scm > $(PREFIX)$(MINLOGDIR)/init.scm
+ 	(cd src; find . -name '*.scm' -type f -exec $(INSTALL_FILE) {} $(PREFIX)$(MINLOGDIR)/src/{} \;)
++	(cd util; find . -name '*.el' -type f -exec $(INSTALL_FILE) {} $(PREFIX)$(ELDIR)/{} \;)
+ 	(cd lib; find . -name '*.scm' -type f -exec $(INSTALL_FILE) {} $(PREFIX)$(MINLOGDIR)/lib/{} \;)
+ 	(cd examples; find . -type f -exec $(INSTALL_FILE) {} $(PREFIX)$(DOCDIR)/examples/{} \;)
+ 	(cd doc; find . -name '*.pdf' -type f -exec $(INSTALL_FILE) {} $(PREFIX)$(DOCDIR)/{} \;)
+diff --git a/util/minlog-unicode.el b/util/minlog-unicode.el
+index 0418d6c..6d3275f 100644
+--- a/util/minlog-unicode.el
++++ b/util/minlog-unicode.el
+@@ -43,3 +43,5 @@
+ (add-hook 'minlog-font-lock-mode-off-hook 'remove-minlog-symbol-keywords)
+ (add-hook 'scheme-mode-hook 'minlog-font-lock-mode 'append)
+ (add-hook 'inferior-scheme-mode-hook 'minlog-font-lock-mode 'append)
++
++(provide 'minlog-unicode)

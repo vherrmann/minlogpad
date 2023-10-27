@@ -1,7 +1,9 @@
 (require 'minlog)
 (require 'minlog-unicode)
 
-(run-minlog)
+;; use emacs windows
+(let ((window-system nil))
+  (run-minlog))
 
 (setq-default indent-tabs-mode nil)
 
@@ -14,7 +16,7 @@
  '(xterm-mouse-mode t)
  '(inhibit-startup-screen t))
 
-(run-with-idle-timer 60 t '(lambda () (save-some-buffers t nil)))
+(run-with-idle-timer 60 t (lambda () (save-some-buffers t nil)))
 
 (require 'evil)
 (setq evil-default-state 'emacs)
