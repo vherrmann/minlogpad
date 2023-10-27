@@ -9,6 +9,16 @@
  '(xterm-mouse-mode t)
  '(inhibit-startup-screen t))
 
+(defun open-minlog-tutorial () (interactive) (find-file "~/doc/tutor.pdf"))
+(defun open-minlog-tutorial-examples () (interactive) (find-file "~/examples/tutor.scm"))
+(defun open-minlog-examples () (interactive) (find-file "~/examples"))
+(defun open-minlog-ref () (interactive) (find-file "~/doc/ref.pdf"))
+(define-key menu-bar-help-menu [sep9] '("--"))
+(define-key menu-bar-help-menu [f] '(menu-item "Minlog Tutorial" open-minlog-tutorial))
+(define-key menu-bar-help-menu [g] '(menu-item "Minlog Tutorial Examples" open-minlog-tutorial-examples))
+(define-key menu-bar-help-menu [h] '(menu-item "Minlog Examples" open-minlog-examples))
+(define-key menu-bar-help-menu [i] '(menu-item "Minlog Reference" open-minlog-ref))
+
 (run-with-idle-timer 60 t (lambda () (save-some-buffers t nil)))
 
 (require 'evil)
