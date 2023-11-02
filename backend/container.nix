@@ -184,13 +184,6 @@ in {
     uid = 995;
   };
 
-  systemd.tmpfiles.rules = [
-    "C /home/.skeleton/examples 0750 guest guest - ${minlog-package}/share/doc/minlog/examples"
-    "d /home/.skeleton/doc/ 0750 guest guest - -"
-    "C /home/.skeleton/doc/tutor.pdf 0750 guest guest - ${minlog-package}/share/doc/minlog/tutor.pdf"
-    "C /home/.skeleton/doc/ref.pdf 0750 guest guest - ${minlog-package}/share/doc/minlog/ref.pdf"
-  ];
-
   systemd.services.nginx.serviceConfig.BindReadOnlyPaths =
     "/proc/loadavg:/loadavg";
   services.nginx = {
@@ -297,6 +290,14 @@ in {
         Storage=volatile
         RuntimeMaxUse=1M
       '';
+
+      # use shared nix store
+      systemd.tmpfiles.rules = [
+        "L /home/guest/examples - - - - ${minlog-package}/share/doc/minlog/examples"
+        "d /home/guest/doc/ 0750 guest guest - -"
+        "L /home/guest/doc/tutor.pdf - - - - ${minlog-package}/share/doc/minlog/tutor.pdf"
+        "L /home/guest/doc/ref.pdf - - - - ${minlog-package}/share/doc/minlog/ref.pdf"
+      ];
 
       time.hardwareClockInLocalTime = true;
 
