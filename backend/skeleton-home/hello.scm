@@ -17,6 +17,7 @@
 ;; C-x C-e          evaluate last s-expression
 ;; C-c C-r          evaluate region
 ;; C-c C-e          evaluate last definition
+;; C-c C-u          undo last minlog action
 ;; C-c C-l          load scheme file
 
 ;; C-x b            select named Buffer

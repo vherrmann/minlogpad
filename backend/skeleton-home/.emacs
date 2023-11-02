@@ -14,10 +14,10 @@
 (defun open-minlog-examples () (interactive) (find-file "~/examples"))
 (defun open-minlog-ref () (interactive) (find-file "~/doc/ref.pdf"))
 (define-key menu-bar-help-menu [sep9] '("--"))
-(define-key menu-bar-help-menu [f] '(menu-item "Minlog Tutorial" open-minlog-tutorial))
-(define-key menu-bar-help-menu [g] '(menu-item "Minlog Tutorial Examples" open-minlog-tutorial-examples))
-(define-key menu-bar-help-menu [h] '(menu-item "Minlog Examples" open-minlog-examples))
-(define-key menu-bar-help-menu [i] '(menu-item "Minlog Reference" open-minlog-ref))
+(define-key menu-bar-help-menu [minlog-tut] '(menu-item "Minlog Tutorial" open-minlog-tutorial))
+(define-key menu-bar-help-menu [minlog-tut-ex] '(menu-item "Minlog Tutorial Examples" open-minlog-tutorial-examples))
+(define-key menu-bar-help-menu [minlog-ex] '(menu-item "Minlog Examples" open-minlog-examples))
+(define-key menu-bar-help-menu [minlog-ref] '(menu-item "Minlog Reference" open-minlog-ref))
 
 (run-with-idle-timer 60 t (lambda () (save-some-buffers t nil)))
 
@@ -40,6 +40,16 @@
 (global-unset-key (kbd "C-z"))
 (global-set-key (kbd "C-z")   'undo-fu-only-undo)
 (global-set-key (kbd "C-S-z") 'undo-fu-only-redo)
+
+;; minlog kbds
+
+(defun minlog-send-undo ()
+  (interactive)
+  (comint-send-string (scheme-proc) "(undo)\n"))
+
+(require 'scheme)
+(define-key scheme-mode-menu [minlog-send-undo] '(menu-item "Minlog Send Undo" minlog-send-undo))
+(define-key scheme-mode-map (kbd "C-c C-u") #'minlog-send-undo)
 
 ;; adapted from minlog source
 (defun run-minlog (&optional filename)
