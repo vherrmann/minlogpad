@@ -41,18 +41,37 @@
 (global-set-key (kbd "C-z")   'undo-fu-only-undo)
 (global-set-key (kbd "C-S-z") 'undo-fu-only-redo)
 
-;; minlog kbds
-
-(defun minlog-send-undo ()
-  (interactive)
-  (comint-send-string (scheme-proc) "(undo)\n"))
+;;; minlog
 
 (require 'scheme)
-(define-key scheme-mode-menu [minlog-send-undo] '(menu-item "Minlog Send Undo" minlog-send-undo))
-(define-key scheme-mode-map (kbd "C-c C-u") #'minlog-send-undo)
+(require 'cmuscheme)
 
 ;; adapted from minlog source
-(defun run-minlog (&optional filename)
+(defun minlog-run-repl ()
+  (interactive)
+  ;; MINLOG directory
+  (setq minlogpath (getenv "MINLOGPATH"))
+
+  (setq scheme "scheme")
+
+  (setq heapload (concat minlogpath "/init.scm"))
+
+  (with-selected-window (or (and scheme-buffer
+                                 (get-buffer-window scheme-buffer))
+                            (selected-window))
+    (run-scheme (concat scheme " " heapload))))
+
+(defun minlog-restart-repl ()
+  (interactive)
+
+  (when (and scheme-buffer
+             (get-buffer scheme-buffer)
+             (comint-check-proc scheme-buffer))
+    (comint-send-string (scheme-proc) "(exit)\n"))
+  (sit-for 0.2) ;; ugly hack
+  (minlog-run-repl))
+
+(defun minlog-setup (&optional filename)
   ;; Enable utf-8
   (setq default-enable-multibyte-characters t)
   (condition-case nil
@@ -61,19 +80,25 @@
   (condition-case nil
       (set-language-environment "utf-8")
     (error nil))
+
   (set-input-method "TeX")
-
-  ;; MINLOG directory
-  (setq minlogpath (getenv "MINLOGPATH"))
-
-  (setq scheme "scheme")
-
-  (setq heapload (concat minlogpath "/init.scm"))
 
   (split-window nil nil t)
   (with-selected-window (next-window)
-    (run-scheme (concat scheme " " heapload))))
+    (minlog-run-repl)))
 
 (require 'minlog-unicode)
 
-(run-minlog)
+;; minlog kbds
+
+(defun minlog-send-undo ()
+  (interactive)
+  (comint-send-string (scheme-proc) "(undo)\n"))
+
+(define-key scheme-mode-menu [minlog-restart-repl] '(menu-item "Minlog Restart Repl" minlog-restart-repl))
+(define-key scheme-mode-map (kbd "C-c r") #'minlog-restart-repl)
+(define-key scheme-mode-menu [minlog-send-undo] '(menu-item "Minlog Send Undo" minlog-send-undo))
+(define-key scheme-mode-map (kbd "C-c C-u") #'minlog-send-undo)
+
+
+(minlog-setup)

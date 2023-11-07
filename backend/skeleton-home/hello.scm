@@ -14,6 +14,7 @@
 ;; terminate Minlog or quit Emacs in case Minlog is taking an extraordinate amount of
 ;; time.
 
+;; C-c r            restart minlog repl
 ;; C-x C-e          evaluate last s-expression
 ;; C-c C-r          evaluate region
 ;; C-c C-e          evaluate last definition
