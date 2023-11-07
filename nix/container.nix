@@ -2,11 +2,11 @@
 { config, pkgs, ... }:
 
 let
-  minlogpad-package = pkgs.callPackage ./package.nix { };
-  minlogpad-static = pkgs.callPackage ./static.nix { };
+  minlogpad-backend = pkgs.callPackage (import ../backend/package.nix) { };
+  minlogpad-frontend = pkgs.callPackage (import ../frontend/package.nix) { };
   minlog-package =
     pkgs.callPackage (import ./minlog.nix { inherit (inputs) minlogSrc; }) { };
-  myttyd = (pkgs.callPackage ./ttyd/default.nix { }).overrideAttrs
+  myttyd = (pkgs.callPackage ../backend/ttyd/default.nix { }).overrideAttrs
     (oldAttrs: rec {
       postPatch = ''
         sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
@@ -64,7 +64,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       ExecStart =
-        "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${minlogpad-package}/xprovisor.pl";
+        "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${minlogpad-backend}/xprovisor.pl";
     };
     path = with pkgs; [
       bash
@@ -83,7 +83,7 @@ in {
     description = "xmaint";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${minlogpad-package}/xprovisor.pl";
+      ExecStart = "${minlogpad-backend}/xprovisor.pl";
       Environment = "WEBSOCAT_URI=/?maintainance";
     };
     path = with pkgs; [
@@ -111,7 +111,7 @@ in {
     serviceConfig = {
       MemoryMax = "3G";
       ExecStart =
-        "${myttyd}/bin/ttyd -b /__tty -a ${minlogpad-package}/ttyprovisor.pl";
+        "${myttyd}/bin/ttyd -b /__tty -a ${minlogpad-backend}/ttyprovisor.pl";
     };
     path = with pkgs; [
       bash
@@ -129,7 +129,7 @@ in {
     description = "ttymaint";
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${minlogpad-package}/ttyprovisor.pl .maintainance";
+      ExecStart = "${minlogpad-backend}/ttyprovisor.pl .maintainance";
     };
     path = with pkgs; [
       bash
@@ -155,7 +155,7 @@ in {
     wantedBy = [ "shutdown.target" ];
     serviceConfig = {
       Type = "oneshot";
-      ExecStart = "${minlogpad-package}/xprovisor.pl";
+      ExecStart = "${minlogpad-backend}/xprovisor.pl";
       Environment = "WEBSOCAT_URI=/?terminate";
       TimeoutStartSec = "0";
     };
@@ -222,13 +222,13 @@ in {
     virtualHosts.localhost = {
       locations = {
         "/" = {
-          root = minlogpad-static;
+          root = minlogpad-frontend;
           extraConfig = ''
             expires 7d;
           '';
         };
         "/index.html" = {
-          root = minlogpad-static;
+          root = minlogpad-frontend;
           extraConfig = ''
                         expires 3h;
             #            set_by_lua_block $do_preconnect {
@@ -301,9 +301,10 @@ in {
       # share e.g. .emacs with all sessions
       # changes to .emacs will therefore affect old sessions as well
         ++ (map (path:
-          let deriv = ./skeleton-home-shared ++ "/${path}";
-          in "L /home/guest/${path} - - - - ${minlogpad-package}/skeleton-home-shared/${path}")
-          (builtins.attrNames (builtins.readDir ./skeleton-home-shared)));
+          let deriv = ../backend/skeleton-home-shared ++ "/${path}";
+          in "L /home/guest/${path} - - - - ${minlogpad-backend}/skeleton-home-shared/${path}")
+          (builtins.attrNames
+            (builtins.readDir ../backend/skeleton-home-shared)));
 
       time.hardwareClockInLocalTime = true;
 
@@ -369,9 +370,9 @@ in {
           description = "vnc";
           serviceConfig = {
             User = "guest";
-            ExecStart = "${minlogpad-package}/vncinit.sh";
+            ExecStart = "${minlogpad-backend}/vncinit.sh";
           };
-          postStop = "${minlogpad-package}/vncdown.sh";
+          postStop = "${minlogpad-backend}/vncdown.sh";
           path = with pkgs; [
             bash
             util-linux

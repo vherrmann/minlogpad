@@ -1,7 +1,7 @@
 { lib, stdenv }:
 
 stdenv.mkDerivation rec {
-  name = "minlogpad";
+  name = "minlogpad-backend";
   src = ./.;
 
   installPhase = ''

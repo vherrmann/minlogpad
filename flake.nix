@@ -4,6 +4,7 @@
     minlogSrc.flake = false;
   };
   outputs = { self, ... }@inputs: {
-    nixosModules.container = import ./backend/container.nix { inherit inputs; };
+
+    nixosModules.container = import ./nix/container.nix { inherit inputs; };
   };
 }

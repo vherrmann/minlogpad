@@ -1,8 +1,8 @@
 { lib, stdenv }:
 
 stdenv.mkDerivation rec {
-  name = "minlogpad-static";
-  src = ../frontend;
+  name = "minlogpad-frontend";
+  src = ./.;
 
   installPhase = ''
     mkdir $out
