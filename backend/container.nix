@@ -297,7 +297,13 @@ in {
         "d /home/guest/doc/ 0750 guest guest - -"
         "L /home/guest/doc/tutor.pdf - - - - ${minlog-package}/share/doc/minlog/tutor.pdf"
         "L /home/guest/doc/ref.pdf - - - - ${minlog-package}/share/doc/minlog/ref.pdf"
-      ];
+      ]
+      # share e.g. .emacs with all sessions
+      # changes to .emacs will therefore affect old sessions as well
+        ++ (map (path:
+          let deriv = ./skeleton-home-shared ++ "/${path}";
+          in "L /home/guest/${path} - - - - ${minlogpad-package}/skeleton-home-shared/${path}")
+          (builtins.attrNames (builtins.readDir ./skeleton-home-shared)));
 
       time.hardwareClockInLocalTime = true;
 
