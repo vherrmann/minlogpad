@@ -19,6 +19,13 @@ let
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
     '';
   });
+  # fix dufs to use the minlogpad favicon
+  mydufs = pkgs.dufs.overrideAttrs (oldAttrs: rec {
+    postPatch = ''
+      rm assets/favicon.ico
+      cp ${minlogpad-frontend}/images/favicon.png assets/favicon.ico
+    '';
+  });
   sharedEmacsPkgs = (epkgs: [
     epkgs.evil
     epkgs.tramp-theme
@@ -58,6 +65,15 @@ in {
   # the file nixos/virtualisation/lxc-container.nix is included, thereby
   # enabling this option. We require it to be false, though.
   environment.noXlibs = false;
+
+  systemd.services.dufs = {
+    description = "dufs";
+    wantedBy = [ "multi-user.target" ];
+    serviceConfig = {
+      ExecStart =
+        "${mydufs}/bin/dufs --allow-archive --allow-upload --hidden .* --bind 127.0.0.1 --port 5000 /home --path-prefix dufs";
+    };
+  };
 
   systemd.services.xprovisor = {
     description = "xprovisor";
@@ -192,7 +208,7 @@ in {
     recommendedOptimisation = true;
 
     user = "guest";
-    # so nginx can serve /~foo/bar.scm (also read-write using DAV)
+    # so nginx can serve /dufs/foo/bar.scm (also read-write using DAV)
 
     package = pkgs.nginxMainline.override {
       modules = with pkgs.nginxModules; [ brotli dav develkit moreheaders ];
@@ -253,12 +269,12 @@ in {
           proxyPass = "http://localhost:6080";
           proxyWebsockets = true;
         };
-        "~ ^/~(\\w+)(\\/.*)?$" =
-          { # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.
-            alias = "/home/$1$2";
+        "~ ^/dufs/(\\w+|__dufs.*)(\\/.*)?$" =
+          { # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.,
+            # but allow dufs to load its assets
+            proxyPass = "http://127.0.0.1:5000/dufs/$1$2";
             extraConfig = ''
               expires epoch;
-              autoindex on;
               dav_methods     PUT DELETE MKCOL COPY MOVE;
               dav_ext_methods PROPFIND OPTIONS;
               dav_access      user:rw group:rw all:r;
@@ -268,8 +284,8 @@ in {
     };
   };
 
-  # required so nginx can serve /~foo/bar.scm
-  systemd.services.nginx.serviceConfig.ProtectHome = "no";
+  # # required so nginx can serve /dufs/foo/bar.scm
+  # systemd.services.nginx.serviceConfig.ProtectHome = "no";
 
   containers = let
     # config shared by xskeleton and ttyskeleton

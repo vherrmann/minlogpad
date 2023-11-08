@@ -183,4 +183,4 @@ to `/etc/nixos/configuration.nix`.
 * system image for offline work
 * ssh access
 * document viewonly mode
-* document `/~foo/bar.scm` http read-only access and read-write access using WebDAV
+* document `/dufs/foo/bar.scm` http read-only access and read-write access using WebDAV

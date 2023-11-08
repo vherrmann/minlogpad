@@ -434,8 +434,8 @@
     <textarea id="clipboard" disabled></textarea>
     <img src="images/clipboard.svg" id="clipboard-icon">
     <div>
-        <input type="button" value="Download files (or upload via WebDAV)" onclick="
-            window.location.href = '/~' + sessionNameFromHash() + '/';
+        <input type="button" value="Download or upload files" onclick="
+            window.location.href = '/dufs/' + sessionNameFromHash() + '/';
         ">
         <input type="reset" value="Clear" style="display: none">
         <input type="button" value="Activate auto-synchronization of clipboard [not in Firefox]" id="clipboard-autosync">
