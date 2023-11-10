@@ -2,10 +2,11 @@
 { config, pkgs, ... }:
 
 let
-  minlogpad-backend = pkgs.callPackage (import ../backend/package.nix) { };
-  minlogpad-frontend = pkgs.callPackage (import ../frontend/package.nix) { };
   minlog-package =
     pkgs.callPackage (import ./minlog.nix { inherit (inputs) minlogSrc; }) { };
+  minlogpad-backend = pkgs.callPackage (import ../backend/package.nix) { };
+  minlogpad-frontend = pkgs.callPackage
+    (import ../frontend/package.nix { inherit minlog-package; }) { };
   myttyd = (pkgs.callPackage ../backend/ttyd/default.nix { }).overrideAttrs
     (oldAttrs: rec {
       postPatch = ''
