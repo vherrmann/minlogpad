@@ -41,7 +41,7 @@ of Linux will be forthcoming.
 
 1. Create and start the container:
 
-       $ nixos-container create box --config-file ./container.nix
+       $ sudo nixos-container create flake-test --flake ./
        $ nixos-container start box
 
 2. Inside the container, create the directory `/home/.skeleton` so that the
