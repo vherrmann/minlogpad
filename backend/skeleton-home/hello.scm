@@ -31,10 +31,8 @@
 ;; M-o              toggle Vi keybindings
 ;; C-x C-+          increase font size
 
-;; "C-c" means "<Ctrl key> + c". In case your browser is intercepting C-c,
-;; you can also use C-o. In case your browser in intercepting C-SPC, you can
-;; also use C-p. For pasting code into the Minlogpad, see the clipboard
-;; icon in the lower right corner.
+;; "C-c" means "<Ctrl key> + c". For pasting code into the Minlogpad,
+;; see the clipboard icon in the lower right corner.
 
 ;; In text mode, use <F10> to access the menu bar, not the mouse.
 
