@@ -1,4 +1,4 @@
-{ inputs, ... }:
+{ inputs, isOnline, ... }:
 { pkgs, ... }:
 let
   minlog =
@@ -43,15 +43,21 @@ let
       name = "emacs";
       paths = [ epk ];
       buildInputs = [ pkgs.makeWrapper ];
-      postBuild = ''
+      postBuild = if isOnline then ''
         wrapProgram $out/bin/emacs \
         --set MINLOGPATH "${minlog}/share/minlog"
+      '' else ''
+        wrapProgram $out/bin/emacs \
+        --set MINLOGPATH "${minlog}/share/minlog" \
+        --run "mkdir /tmp/minlogpad-emacs-config -p" \
+        --run "cp -u ${minlogpad-backend}/skeleton-home-shared/.emacs /tmp/minlogpad-emacs-config/init.el" \
+        --add-flags "--init-directory /tmp/minlogpad-emacs-config"
       '';
     };
-  emacsWithMinlog = linkMinlogPathToEmacs (pkgs.emacs.pkgs.withPackages
+  emacsWithMinlog = linkMinlogPathToEmacs (pkgs.emacs29.pkgs.withPackages
     (epkgs: sharedEmacsPkgs epkgs ++ [ epkgs.polymode epkgs.markdown-mode ]));
   emacsWithMinlogNoX =
-    linkMinlogPathToEmacs (pkgs.emacs-nox.pkgs.withPackages sharedEmacsPkgs);
+    linkMinlogPathToEmacs (pkgs.emacs29-nox.pkgs.withPackages sharedEmacsPkgs);
 in {
   inherit minlog minlogpad-backend minlogpad-frontend emacsWithMinlog
     emacsWithMinlogNoX;

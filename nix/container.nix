@@ -2,7 +2,10 @@
 { pkgs, ... }:
 
 let
-  inherit (import ./packages.nix { inherit inputs; } { inherit pkgs; })
+  inherit (import ./packages.nix {
+    inherit inputs;
+    isOnline = true;
+  } { inherit pkgs; })
     minlog minlogpad-backend minlogpad-frontend emacsWithMinlog
     emacsWithMinlogNoX;
   myttyd = (pkgs.callPackage ../backend/ttyd/default.nix { }).overrideAttrs

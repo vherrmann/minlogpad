@@ -105,11 +105,11 @@
    (when and-go
      (geiser-repl-switch))))
 
-(defvar minlogpad/send-buffer--indirect-buffer nil)
-(defun minlogpad/send-buffer--cleanup-indirect-buffer ()
-  (kill-buffer minlogpad/send-buffer--indirect-buffer))
+(defvar minlogpad/send-buffer-substring--indirect-buffer nil)
+(defun minlogpad/send-buffer-substring--cleanup-indirect-buffer ()
+  (kill-buffer minlogpad/send-buffer-substring--indirect-buffer))
 
-(defvar minlogpad/send-buffer--cont nil)
+(defvar minlogpad/send-buffer-substring--cont nil) ; continuation
 (defun minlogpad/check-for-prompt-and-run-cont (txt)
   ;; stop in case there is an error
   (if (string-match "Type (debug) to enter the debugger.\n> " txt)
@@ -117,26 +117,27 @@
         (remove-hook 'comint-output-filter-functions
                      #'minlogpad/check-for-prompt-and-run-cont
                      t)
-        (minlogpad/send-buffer--cleanup-indirect-buffer))
+        (minlogpad/send-buffer-substring--cleanup-indirect-buffer))
     ;; run continuation if the prompt shows up in the output of the repl
     (when (string-match comint-prompt-regexp txt)
       (remove-hook 'comint-output-filter-functions
                    #'minlogpad/check-for-prompt-and-run-cont
                    t)
-      (funcall minlogpad/send-buffer--cont))))
+      (funcall minlogpad/send-buffer-substring--cont))))
 
-(defun minlogpad/send-buffer--wait-for-prompt-async (cont)
-  (setq minlogpad/send-buffer--cont cont)
+(defun minlogpad/send-buffer-substring--wait-for-prompt-async (cont)
+  (setq minlogpad/send-buffer-substring--cont cont)
   (minlogpad/with-repl
    (add-hook 'comint-output-filter-functions
              #'minlogpad/check-for-prompt-and-run-cont
              nil t)))
 
+(defvar minlogpad/send-buffer-substring--stop? nil) ; boolean
 (defun minlogpad/send-buffer-substring (start end &optional and-go)
   (let ((buff (clone-indirect-buffer (concat "minlogpad-clone: "
                                              (buffer-name (current-buffer)))
                                      nil t)))
-    (setq minlogpad/send-buffer--indirect-buffer buff)
+    (setq minlogpad/send-buffer-substring--indirect-buffer buff)
     (with-current-buffer buff
       (goto-char start))
     ;; beginning-sexp should be on the opening parenthesis
@@ -161,12 +162,12 @@
                                                              and-go))
 
                                     ;; loop
-                                    (minlogpad/send-buffer--wait-for-prompt-async #'send-loop))
+                                    (minlogpad/send-buffer-substring--wait-for-prompt-async #'send-loop))
 
                                 ;; clean-up
-                                (minlogpad/send-buffer--cleanup-indirect-buffer)))
+                                (minlogpad/send-buffer-substring--cleanup-indirect-buffer)))
                      (error (and buff
-                                 (minlogpad/send-buffer--cleanup-indirect-buffer))
+                                 (minlogpad/send-buffer-substring--cleanup-indirect-buffer))
                             (error err)))))
         (send-loop)))))
 

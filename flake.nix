@@ -13,8 +13,11 @@
         overlays = [ ];
         pkgs = import nixpkgs { inherit overlays system; };
 
-        packages =
-          import ./nix/packages.nix { inherit inputs; } { inherit pkgs; };
+        packages = import ./nix/packages.nix {
+          inherit inputs;
+          isOnline = false;
+        } { inherit pkgs; };
+        lib = flake-utils.lib;
       in {
         packages = {
           inherit (packages)
@@ -24,14 +27,8 @@
         };
 
         apps = {
-          emacsWithMinlog = {
-            type = "app";
-            program = "${packages.emacsWithMinlog}/bin/emacs";
-          };
-          emacsWithMinlogNoX = {
-            type = "app";
-            program = "${packages.emacsWithMinlogNoX}/bin/emacs";
-          };
+          emacsWithMinlog = lib.mkApp { drv = packages.emacsWithMinlog; };
+          emacsWithMinlogNoX = lib.mkApp { drv = packages.emacsWithMinlogNoX; };
           default = self.apps."${system}".emacsWithMinlog;
         };
       }) // {
