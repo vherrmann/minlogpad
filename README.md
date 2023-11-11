@@ -4,10 +4,10 @@ Forked from Ingo Blechschmidt's excellent [Minlogpad](https://github.com/iblech/
 **Live demo at https://minlogpad.valentin-herrmann.de/.**
 
 
-
 ## Features
 
 * Graphical mode (using TigerVNC/NoVNC) and text mode (using ttyd)
+* Nix flake for easy access of the preconfigured emacs
 * Hot spares for fresh sessions (with emacs already prestarted)
 * Cold spares for already existing sessions (with X, but not emacs, already
   prestarted)
@@ -17,7 +17,7 @@ Forked from Ingo Blechschmidt's excellent [Minlogpad](https://github.com/iblech/
 * WebDAV access to user files for easy up- and downloading
 * Rudimentary load control (background autoconnect is disabled if server load is high)
 * Building on awesome open source technology: GNU/Linux, Perl, NixOS, TigerVNC,
-  nginx, NoVNC, systemd
+  nginx, NoVNC, systemd, dufs
 * AGPLv3+ licensed
 
 
@@ -26,6 +26,15 @@ Forked from Ingo Blechschmidt's excellent [Minlogpad](https://github.com/iblech/
 Self-hosting the backend is easiest if you are running NixOS. This is not
 strictly necessary though, instructions for self-hosting the backend on any flavor
 of Linux will be forthcoming.
+
+
+### Instructions for a quick minlog session
+
+1. Install nix from https://nixos.org/.
+
+2. Run the preconfigured emacs on your favorite minlogfile
+
+       $ nix run github:vherrmann/minlogpad -- \$FILE
 
 
 ### Instructions for a quick non-permanent setup

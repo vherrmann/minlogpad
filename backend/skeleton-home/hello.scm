@@ -15,21 +15,29 @@
 ;; time.
 
 ;; C-c r            restart minlog repl
-;; C-x C-e          evaluate last s-expression
+;; C-c C-c          evaluate last definition
+;; C-M-x            evaluate last definition
 ;; C-c C-r          evaluate region
-;; C-c C-e          evaluate last definition
+;; C-c C-b          evaluate buffer
+;; C-c C-f          evaluate buffer from pointer
 ;; C-c C-u          undo last minlog action
 ;; C-c C-l          load scheme file
+;; C-c C-z          switch to repl
+
+;; <TAB>            autocomplete
+;; C-g              stop current operation
 
 ;; C-x b            select named Buffer
 ;; C-x C-b          list all buffers
 
 ;; C-x C-f          find file
+;; C-s              search file
 
 ;; C-z              undo
-;; C-S-z            redo
+;; C-Z              redo
 ;; M-o              toggle Vi keybindings
 ;; C-x C-+          increase font size
+;; M-x              execute command
 
 ;; "C-c" means "<Ctrl key> + c". For pasting code into the Minlogpad,
 ;; see the clipboard icon in the lower right corner.

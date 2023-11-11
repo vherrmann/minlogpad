@@ -1,12 +1,10 @@
 { inputs, ... }:
-{ config, pkgs, ... }:
+{ pkgs, ... }:
 
 let
-  minlog-package =
-    pkgs.callPackage (import ./minlog.nix { inherit (inputs) minlogSrc; }) { };
-  minlogpad-backend = pkgs.callPackage (import ../backend/package.nix) { };
-  minlogpad-frontend = pkgs.callPackage
-    (import ../frontend/package.nix { inherit minlog-package; }) { };
+  inherit (import ./packages.nix { inherit inputs; } { inherit pkgs; })
+    minlog minlogpad-backend minlogpad-frontend emacsWithMinlog
+    emacsWithMinlogNoX;
   myttyd = (pkgs.callPackage ../backend/ttyd/default.nix { }).overrideAttrs
     (oldAttrs: rec {
       postPatch = ''
@@ -27,19 +25,6 @@ let
       cp ${minlogpad-frontend}/images/favicon.png assets/favicon.ico
     '';
   });
-  sharedEmacsPkgs = (epkgs: [
-    epkgs.evil
-    epkgs.tramp-theme
-    epkgs.ahungry-theme
-    epkgs.color-theme-sanityinc-tomorrow
-    epkgs.pdf-tools
-    epkgs.which-key
-    epkgs.undo-fu
-    minlog-package
-  ]);
-  myemacs = pkgs.emacs.pkgs.withPackages
-    (epkgs: sharedEmacsPkgs epkgs ++ [ epkgs.polymode epkgs.markdown-mode ]);
-  myemacs-nox = pkgs.emacs-nox.pkgs.withPackages sharedEmacsPkgs;
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -138,7 +123,7 @@ in {
       coreutils
       shadow.su
       tmux
-      myemacs-nox
+      emacsWithMinlogNoX
     ];
   };
 
@@ -156,7 +141,7 @@ in {
       coreutils
       shadow.su
       tmux
-      myemacs-nox
+      emacsWithMinlogNoX
     ];
   };
 
@@ -310,10 +295,10 @@ in {
 
       # use shared nix store
       systemd.tmpfiles.rules = [
-        "L+ /home/guest/examples - - - - ${minlog-package}/share/doc/minlog/examples"
+        "L+ /home/guest/examples - - - - ${minlog}/share/doc/minlog/examples"
         "d /home/guest/doc/ 0750 guest guest - -"
-        "L+ /home/guest/doc/tutor.pdf - - - - ${minlog-package}/share/doc/minlog/tutor.pdf"
-        "L+ /home/guest/doc/ref.pdf - - - - ${minlog-package}/share/doc/minlog/ref.pdf"
+        "L+ /home/guest/doc/tutor.pdf - - - - ${minlog}/share/doc/minlog/tutor.pdf"
+        "L+ /home/guest/doc/ref.pdf - - - - ${minlog}/share/doc/minlog/ref.pdf"
       ]
       # share e.g. .emacs with all sessions
       # changes to .emacs will therefore affect old sessions as well
@@ -331,8 +316,6 @@ in {
       programs.bash.enableCompletion = false;
 
       environment.systemPackages = with pkgs; [ chez ];
-
-      environment.variables.MINLOGPATH = "${minlog-package}/share/minlog";
 
       users.groups.guest = { gid = 994; };
       users.users.guest = {
@@ -354,7 +337,7 @@ in {
           perl
           tmux
           vim
-          myemacs-nox
+          emacsWithMinlogNoX
         ];
       };
     };
@@ -365,7 +348,7 @@ in {
 
         environment.systemPackages = with pkgs; [
           tigervnc
-          myemacs
+          emacsWithMinlog
           screenkey
           st
           mydwm
@@ -398,7 +381,7 @@ in {
             netcat
             coreutils
             mydwm
-            myemacs
+            emacsWithMinlog
           ];
         };
 
