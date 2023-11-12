@@ -117,6 +117,13 @@
         (remove-hook 'comint-output-filter-functions
                      #'minlogpad/check-for-prompt-and-run-cont
                      t)
+        (let* ((indirect-buff minlogpad/send-buffer-substring--indirect-buffer)
+               (direct-buff (buffer-base-buffer indirect-buff))
+               (p (with-current-buffer indirect-buff
+                    (paredit-move-backward)
+                    (point))))
+          (with-current-buffer direct-buff
+            (goto-char p)))
         (minlogpad/send-buffer-substring--cleanup-indirect-buffer))
     ;; run continuation if the prompt shows up in the output of the repl
     (when (string-match comint-prompt-regexp txt)
