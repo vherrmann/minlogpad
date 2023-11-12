@@ -139,7 +139,12 @@
              #'minlogpad/check-for-prompt-and-run-cont
              nil t)))
 
+(require 'geiser-eval)
 (defvar minlogpad/send-buffer-substring--stop? nil) ; boolean
+(advice-add #'geiser-eval-interrupt :before
+            (defun minlogpad/send-buffer-substring--interrupt ()
+              (setq minlogpad/send-buffer-substring--stop? t)))
+
 (defun minlogpad/send-buffer-substring (start end &optional and-go)
   (let ((buff (clone-indirect-buffer (concat "minlogpad-clone: "
                                              (buffer-name (current-buffer)))
@@ -151,31 +156,35 @@
     ;; end-sexp should be on the position after the closing parenthesis
     (let ((beginning-sexp start)
           (end-sexp start))
-      (cl-labels ((send-loop
-                   ()
-                   ;; get next sexp
-                   (condition-case err
-                       (progn (with-current-buffer buff
-                                (setq beginning-sexp end-sexp)
-                                (paredit-move-forward)
-                                (setq end-sexp (1+ (point))))
+      (cl-labels
+          ((send-loop
+            ()
+            ;; get next sexp
+            (condition-case err
+                (progn
+                  (with-current-buffer buff
+                    (setq beginning-sexp end-sexp)
+                    (paredit-move-forward)
+                    (setq end-sexp (1+ (point))))
 
-                              (if (and (not (equal beginning-sexp (1- end-sexp)))
-                                       (<= (1- end-sexp) end))
-                                  (progn
-                                    ;; send sexp
-                                    (with-current-buffer buff
-                                      (minlogpad/send-string (buffer-substring-no-properties beginning-sexp (1- end-sexp))
-                                                             and-go))
+                  (if (and (not (equal beginning-sexp (1- end-sexp)))
+                           (not minlogpad/send-buffer-substring--stop?)
+                           (<= (1- end-sexp) end))
+                      (progn
+                        ;; send sexp
+                        (with-current-buffer buff
+                          (minlogpad/send-string (buffer-substring-no-properties beginning-sexp (1- end-sexp))
+                                                 and-go))
 
-                                    ;; loop
-                                    (minlogpad/send-buffer-substring--wait-for-prompt-async #'send-loop))
+                        ;; loop
+                        (minlogpad/send-buffer-substring--wait-for-prompt-async #'send-loop))
 
-                                ;; clean-up
-                                (minlogpad/send-buffer-substring--cleanup-indirect-buffer)))
-                     (error (and buff
-                                 (minlogpad/send-buffer-substring--cleanup-indirect-buffer))
-                            (error err)))))
+                    ;; clean-up
+                    (setq minlogpad/send-buffer-substring--stop? nil)
+                    (minlogpad/send-buffer-substring--cleanup-indirect-buffer)))
+              (error (and buff
+                          (minlogpad/send-buffer-substring--cleanup-indirect-buffer))
+                     (error err)))))
         (send-loop)))))
 
 (defun minlogpad/send-region (start end &optional and-go)
