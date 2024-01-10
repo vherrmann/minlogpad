@@ -357,7 +357,7 @@ in {
         hardware.pulseaudio.enable = true;
 
         fonts.fontconfig.enable = true;
-        fonts.fonts = with pkgs; [ hack-font ubuntu_font_family ];
+        fonts.packages = with pkgs; [ hack-font ubuntu_font_family ];
 
         services.xserver = {
           enable = true;
