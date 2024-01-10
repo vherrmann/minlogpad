@@ -349,16 +349,6 @@ in {
         imports = [ sharedSystemConfig ];
         hardware.pulseaudio.enable = true;
 
-        environment.systemPackages = with pkgs; [
-          tigervnc
-          emacsWithMinlog
-          screenkey
-          st
-          mydwm
-          netcat
-          xosd
-        ];
-
         fonts.fontconfig.enable = true;
         fonts.fonts = with pkgs; [ hack-font ubuntu_font_family ];
 
@@ -380,6 +370,7 @@ in {
             util-linux
             xorg.xauth
             tigervnc
+            screenkey
             netcat
             coreutils
             mydwm
