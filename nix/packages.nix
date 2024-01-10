@@ -8,14 +8,7 @@ let
     pkgs.callPackage (import ../frontend/package.nix { inherit minlog; }) { };
 
   sharedEmacsPkgs = (epkgs:
-    let
-      mygeiser = epkgs.geiser.overrideAttrs (oldAttrs: rec {
-        patches = (oldAttrs.patches or [ ]) ++ [
-          # https://gitlab.com/emacs-geiser/geiser/-/merge_requests/17
-          ./patches/0001-fix-repl-Make-whitespace-case-more-precise.patch
-        ];
-      });
-    in with epkgs; [
+    with epkgs; [
       # core
       evil
       tramp-theme
@@ -28,7 +21,7 @@ let
       undo-fu
 
       # scheme
-      mygeiser
+      geiser
       geiser-chez
       macrostep-geiser
       paredit
