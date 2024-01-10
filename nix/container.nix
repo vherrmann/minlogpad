@@ -253,10 +253,16 @@ in {
         "/__tty" = {
           proxyPass = "http://localhost:7681";
           proxyWebsockets = true;
+          extraConfig = ''
+            add_header X-Robots-Tag "noindex, follow" always;
+          '';
         };
         "/__vnc" = {
           proxyPass = "http://localhost:6080";
           proxyWebsockets = true;
+          extraConfig = ''
+            add_header X-Robots-Tag "noindex, follow" always;
+          '';
         };
         "~ ^/dufs/(\\w+|__dufs.*)(\\/.*)?$" =
           { # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.,
@@ -264,6 +270,7 @@ in {
             proxyPass = "http://127.0.0.1:5000/dufs/$1$2";
             extraConfig = ''
               expires epoch;
+              add_header X-Robots-Tag "noindex, follow" always;
               dav_methods     PUT DELETE MKCOL COPY MOVE;
               dav_ext_methods PROPFIND OPTIONS;
               dav_access      user:rw group:rw all:r;
