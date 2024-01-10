@@ -1,6 +1,6 @@
-{ lib, stdenv }:
+{ lib, stdenvNoCC }:
 
-stdenv.mkDerivation rec {
+stdenvNoCC.mkDerivation rec {
   name = "minlogpad-backend";
   src = ./.;
 

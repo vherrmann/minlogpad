@@ -8,14 +8,17 @@ let
   } { inherit pkgs; })
     minlog minlogpad-backend minlogpad-frontend emacsWithMinlog
     emacsWithMinlogNoX;
-  myttyd = (pkgs.callPackage ../backend/ttyd/default.nix { }).overrideAttrs
-    (oldAttrs: rec {
-      postPatch = ''
-        sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
-        sed -ie "s/Connection Closed/Connection closed/" html/src/components/terminal/index.tsx
-        sed -ie "s/document.title = data + ' | ' + this.title;/document.title = data;/" html/src/components/terminal/index.tsx
-      '';
-    });
+  myttyd = pkgs.ttyd.overrideAttrs (oldAttrs: rec {
+    # Unfortunately, this postPatch hook will not have any effect, as the ttyd
+    # package in nixpkgs uses an upstream-provided compiled blob instead of
+    # regenerating from index.tsx. There is a custom version of ttyd in the
+    # repository history, but this proved too much effort to maintain.
+    postPatch = ''
+      sed -ie "/window.addEventListener('beforeunload', this.onWindowUnload);/ d" html/src/components/terminal/index.tsx
+      sed -ie "s/Connection Closed/Connection closed/" html/src/components/terminal/index.tsx
+      sed -ie "s/document.title = data + ' | ' + this.title;/document.title = data;/" html/src/components/terminal/index.tsx
+    '';
+  });
   mydwm = pkgs.dwm.overrideAttrs (oldAttrs: rec {
     postPatch = ''
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
@@ -116,7 +119,7 @@ in {
     serviceConfig = {
       MemoryMax = "3G";
       ExecStart =
-        "${myttyd}/bin/ttyd -b /__tty -a ${minlogpad-backend}/ttyprovisor.pl";
+        "${myttyd}/bin/ttyd -W -b /__tty -a ${minlogpad-backend}/ttyprovisor.pl";
     };
     path = with pkgs; [
       bash
@@ -336,6 +339,8 @@ in {
         uid = 995;
       };
 
+      documentation.doc.enable = false;
+
       system.stateVersion = "23.05";
     };
   in {
@@ -398,6 +403,8 @@ in {
       };
     };
   };
+
+  documentation.doc.enable = false;
 
   system.stateVersion = "23.05";
 }
