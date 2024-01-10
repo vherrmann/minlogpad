@@ -39,13 +39,19 @@ let
       postBuild = if isOnline then ''
         wrapProgram $out/bin/emacs \
         --set MINLOGPATH "${minlog}/share/minlog"
-      '' else ''
-        wrapProgram $out/bin/emacs \
-        --set MINLOGPATH "${minlog}/share/minlog" \
-        --run "mkdir /tmp/minlogpad-emacs-config -p" \
-        --run "cp -u ${minlogpad-backend}/skeleton-home-shared/.emacs /tmp/minlogpad-emacs-config/init.el" \
-        --add-flags "--init-directory /tmp/minlogpad-emacs-config"
-      '';
+      '' else
+        let
+          confDir = "/tmp/minlogpad-emacs-config";
+          confFile = "${confDir}/init.el";
+        in ''
+          wrapProgram $out/bin/emacs \
+          --set MINLOGPATH "${minlog}/share/minlog" \
+          --run "mkdir ${confDir} -p" \
+          --run "([ ! -f ${confFile} ] || [ -L ${confFile} ]) \
+                 && ln -fs ${minlogpad-backend}/skeleton-home-shared/.emacs \
+                           ${confFile}" \
+          --add-flags "--init-directory ${confDir}"
+        '';
     };
   emacsWithMinlog = linkMinlogPathToEmacs (pkgs.emacs29.pkgs.withPackages
     (epkgs: sharedEmacsPkgs epkgs ++ [ epkgs.polymode epkgs.markdown-mode ]));
