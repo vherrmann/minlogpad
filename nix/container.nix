@@ -364,7 +364,6 @@ in {
 
         services.xserver = {
           enable = true;
-          # desktopManager.xfce.enable = true;
           displayManager.startx.enable = true;
         };
 
