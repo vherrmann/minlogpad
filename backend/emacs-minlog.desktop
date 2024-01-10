@@ -1,8 +1,0 @@
-[Desktop Entry]
-Type=Application
-Name=emacs-minlog
-Comment=
-Exec=emacs hello.scm
-StartupNotify=false
-Terminal=false
-Hidden=false
