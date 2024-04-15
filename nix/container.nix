@@ -24,13 +24,13 @@ let
       sed -i -e 's/showbar\s*=\s*1/showbar = 0/' config.def.h
     '';
   });
-  # fix dufs to use the minlogpad favicon
-  mydufs = pkgs.dufs.overrideAttrs (oldAttrs: rec {
-    postPatch = ''
-      rm assets/favicon.ico
-      cp ${minlogpad-frontend}/images/favicon.png assets/favicon.ico
-    '';
-  });
+  dufsCustomAssets = pkgs.runCommand "dufs-assets" { } ''
+    mkdir $out
+    cp -n ${pkgs.dufs.src}/assets/* $out/
+    chmod +w $out/favicon.ico
+    rm $out/favicon.ico
+    cp ${minlogpad-frontend}/images/favicon.png $out/favicon.ico
+  '';
 in {
   services.journald.extraConfig = ''
     Storage=volatile
@@ -63,7 +63,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       ExecStart =
-        "${mydufs}/bin/dufs --allow-archive --allow-upload --hidden .* --bind 127.0.0.1 --port 5000 /home --path-prefix dufs";
+        "${pkgs.dufs}/bin/dufs --assets ${dufsCustomAssets} --allow-archive --allow-upload --hidden .* --bind 127.0.0.1 --port 5000 /home --path-prefix dufs";
     };
   };
 
