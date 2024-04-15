@@ -309,6 +309,13 @@
               (minlogpad/with-repl
                (apply oldfun r))))
 
+;; add syntax highlighting
+(add-hook 'scheme-mode-hook
+          (lambda ()
+            (font-lock-add-keywords
+             nil
+             '(("set-goal\\|save" . font-lock-keyword-face)))))
+
 ;; setup minlog for opened scheme file
 (add-hook 'geiser-mode-hook
           (defun minlogpad/minlog-setup-hook-one-shot ()
