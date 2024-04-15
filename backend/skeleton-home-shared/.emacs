@@ -12,7 +12,9 @@
 (setq x-stretch-cursor t
       xterm-mouse-mode t
       scroll-margin 2
-      inhibit-startup-screen t)
+      inhibit-startup-screen t
+      scroll-step 1
+      scroll-conservatively 10000)
 
 ;; automatically save files periodically
 (run-with-idle-timer 60 t (lambda () (save-some-buffers t nil)))
