@@ -32,26 +32,29 @@ let
       minlog
     ]);
   linkMinlogPathToEmacs = epk:
-    pkgs.symlinkJoin {
-      name = "emacs";
-      paths = [ epk ];
+    pkgs.stdenv.mkDerivation {
+      name = "minlogpad";
       buildInputs = [ pkgs.makeWrapper ];
-      postBuild = if isOnline then ''
-        wrapProgram $out/bin/emacs \
+      dontUnpack = true;
+      postBuild = ''
+        mkdir -p $out/bin/
+        touch /tmp/test
+      '' + (if isOnline then ''
+        makeWrapper ${epk}/bin/emacs $out/bin/minlogpad \
         --set MINLOGPATH "${minlog}/share/minlog"
       '' else
         let
           confDir = "/tmp/minlogpad-emacs-config";
           confFile = "${confDir}/init.el";
         in ''
-          wrapProgram $out/bin/emacs \
+          makeWrapper ${epk}/bin/emacs $out/bin/minlogpad \
           --set MINLOGPATH "${minlog}/share/minlog" \
           --run "mkdir ${confDir} -p" \
           --run "([ ! -f ${confFile} ] || [ -L ${confFile} ]) \
                  && ln -fs ${minlogpad-backend}/skeleton-home-shared/.emacs \
                            ${confFile}" \
           --add-flags "--init-directory ${confDir}"
-        '';
+        '');
     };
   emacsWithMinlog = linkMinlogPathToEmacs (pkgs.emacs29.pkgs.withPackages
     (epkgs: sharedEmacsPkgs epkgs ++ [ epkgs.polymode epkgs.markdown-mode ]));
