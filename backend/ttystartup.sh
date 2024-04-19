@@ -8,4 +8,4 @@ cd /home/guest
 cp --reflink=auto --no-preserve=mode --update=none -rT @out@/skeleton-home .
 
 echo -en "\033]0;$1 | Minlogpad\007"
-exec tmux new-session -A -s fun -- emacs hello.scm
+exec tmux new-session -A -s fun -- minlogpad hello.scm

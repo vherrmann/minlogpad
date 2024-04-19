@@ -26,4 +26,4 @@ done | osd_cat -l 1 -d 1 -c purple -A right -p top &
 [ -x .xstartup ] && . .xstartup
 
 dwm &
-exec emacs --fullscreen hello.scm
+exec minlogpad --fullscreen hello.scm
