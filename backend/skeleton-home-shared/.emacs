@@ -25,11 +25,13 @@
 (defun open-minlog-tutorial-examples () (interactive) (find-file "~/examples/tutor.scm"))
 (defun open-minlog-examples () (interactive) (find-file "~/examples"))
 (defun open-minlog-ref () (interactive) (find-file "~/doc/ref.pdf"))
+(defun open-minlog-exercises () (interactive) (find-file "~/exercises/"))
 (define-key menu-bar-help-menu [sep9] '("--"))
 (define-key menu-bar-help-menu [minlog-tut] '(menu-item "Minlog Tutorial" open-minlog-tutorial))
 (define-key menu-bar-help-menu [minlog-tut-ex] '(menu-item "Minlog Tutorial Examples" open-minlog-tutorial-examples))
 (define-key menu-bar-help-menu [minlog-ex] '(menu-item "Minlog Examples" open-minlog-examples))
 (define-key menu-bar-help-menu [minlog-ref] '(menu-item "Minlog Reference" open-minlog-ref))
+(define-key menu-bar-help-menu [minlog-exercises] '(menu-item "Lecture Exercises" open-minlog-exercises))
 
 ;;; evil
 (setq evil-toggle-key "M-o"
