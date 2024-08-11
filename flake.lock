@@ -21,11 +21,11 @@
     "minlogSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1713098244,
-        "narHash": "sha256-WWkYjf0vMf6zhSW9zr1hdV8D1W08l5Y0auMghMhFU68=",
+        "lastModified": 1712649790,
+        "narHash": "sha256-juosLQdH80rF5OtSq+5TgbPCzn5EWM4SDmMK7WARKbg=",
         "ref": "dev",
-        "rev": "92a3f38d4532942016525ebdfb05c0a0791cad97",
-        "revCount": 737,
+        "rev": "a760d5f65db18d29b435d871e42246ea3b21e41a",
+        "revCount": 735,
         "type": "git",
         "url": "https://www.math.lmu.de/~minlogit/git/minlog.git"
       },
@@ -37,11 +37,11 @@
     },
     "nixpkgs": {
       "locked": {
-        "lastModified": 1712963716,
-        "narHash": "sha256-WKm9CvgCldeIVvRz87iOMi8CFVB1apJlkUT4GGvA0iM=",
+        "lastModified": 1722813957,
+        "narHash": "sha256-IAoYyYnED7P8zrBFMnmp7ydaJfwTnwcnqxUElC1I26Y=",
         "owner": "NixOS",
         "repo": "nixpkgs",
-        "rev": "cfd6b5fc90b15709b780a5a1619695a88505a176",
+        "rev": "cb9a96f23c491c081b38eab96d22fa958043c9fa",
         "type": "github"
       },
       "original": {

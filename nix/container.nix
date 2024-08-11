@@ -1,13 +1,19 @@
 { inputs, ... }:
 { pkgs, ... }:
 
+# FIXME: Use https://nixos.org/manual/nixos/stable/options#opt-security.isolate.enable
 let
-  inherit (import ./packages.nix {
-    inherit inputs;
-    isOnline = true;
-  } { inherit pkgs; })
-    minlog minlogpad-backend minlogpad-frontend emacsWithMinlog
-    emacsWithMinlogNoX;
+  inherit
+    (import ./packages.nix {
+      inherit inputs;
+      isOnline = true;
+    } { inherit pkgs; })
+    minlog
+    minlogpad-backend
+    minlogpad-frontend
+    emacsWithMinlog
+    emacsWithMinlogNoX
+    ;
   myttyd = pkgs.ttyd.overrideAttrs (oldAttrs: rec {
     # Unfortunately, this postPatch hook will not have any effect, as the ttyd
     # package in nixpkgs uses an upstream-provided compiled blob instead of
@@ -31,7 +37,8 @@ let
     rm $out/favicon.ico
     cp ${minlogpad-frontend}/images/favicon.png $out/favicon.ico
   '';
-in {
+in
+{
   services.journald.extraConfig = ''
     Storage=volatile
     RuntimeMaxUse=20M
@@ -62,8 +69,7 @@ in {
     description = "dufs";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart =
-        "${pkgs.dufs}/bin/dufs --assets ${dufsCustomAssets} --allow-archive --allow-upload --hidden .* --bind 127.0.0.1 --port 5000 /home --path-prefix dufs";
+      ExecStart = "${pkgs.dufs}/bin/dufs --assets ${dufsCustomAssets} --allow-archive --allow-upload --hidden .* --bind 127.0.0.1 --port 5000 /home --path-prefix dufs";
     };
   };
 
@@ -71,8 +77,7 @@ in {
     description = "xprovisor";
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
-      ExecStart =
-        "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${minlogpad-backend}/xprovisor.pl";
+      ExecStart = "${pkgs.websocat}/bin/websocat -e -E --binary ws-l:0.0.0.0:6080 sh-c:${minlogpad-backend}/xprovisor.pl";
     };
     path = with pkgs; [
       bash
@@ -110,7 +115,9 @@ in {
   systemd.timers.xprovisor-maint = {
     wantedBy = [ "timers.target" ];
     description = "xmaint";
-    timerConfig = { OnCalendar = "*:0/1"; };
+    timerConfig = {
+      OnCalendar = "*:0/1";
+    };
   };
 
   systemd.services.ttyprovisor = {
@@ -118,8 +125,7 @@ in {
     wantedBy = [ "multi-user.target" ];
     serviceConfig = {
       MemoryMax = "3G";
-      ExecStart =
-        "${myttyd}/bin/ttyd -W -b /__tty -a ${minlogpad-backend}/ttyprovisor.pl";
+      ExecStart = "${myttyd}/bin/ttyd -W -b /__tty -a ${minlogpad-backend}/ttyprovisor.pl";
     };
     path = with pkgs; [
       bash
@@ -154,7 +160,9 @@ in {
   systemd.timers.ttyprovisor-maint = {
     wantedBy = [ "timers.target" ];
     description = "ttymaint";
-    timerConfig = { OnCalendar = "*:0/1"; };
+    timerConfig = {
+      OnCalendar = "*:0/1";
+    };
   };
 
   systemd.services.terminate-before-shutdown = {
@@ -183,7 +191,9 @@ in {
   services.openssh.enable = true;
   services.openssh.settings.PermitRootLogin = "yes";
 
-  users.groups.guest = { gid = 994; };
+  users.groups.guest = {
+    gid = 994;
+  };
   users.users.guest = {
     isSystemUser = true;
     group = "guest";
@@ -192,8 +202,7 @@ in {
     uid = 995;
   };
 
-  systemd.services.nginx.serviceConfig.BindReadOnlyPaths =
-    "/proc/loadavg:/loadavg";
+  systemd.services.nginx.serviceConfig.BindReadOnlyPaths = "/proc/loadavg:/loadavg";
   services.nginx = {
     enable = true;
     recommendedGzipSettings = true;
@@ -203,7 +212,12 @@ in {
     # so nginx can serve /dufs/foo/bar.scm (also read-write using DAV)
 
     package = pkgs.nginxMainline.override {
-      modules = with pkgs.nginxModules; [ brotli dav develkit moreheaders ];
+      modules = with pkgs.nginxModules; [
+        brotli
+        dav
+        develkit
+        moreheaders
+      ];
     };
 
     # important to prevent annoying reconnects
@@ -267,18 +281,18 @@ in {
             add_header X-Robots-Tag "noindex, follow" always;
           '';
         };
-        "~ ^/dufs/(\\w+|__dufs.*)(\\/.*)?$" =
-          { # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.,
-            # but allow dufs to load its assets
-            proxyPass = "http://127.0.0.1:5000/dufs/$1$2";
-            extraConfig = ''
-              expires epoch;
-              add_header X-Robots-Tag "noindex, follow" always;
-              dav_methods     PUT DELETE MKCOL COPY MOVE;
-              dav_ext_methods PROPFIND OPTIONS;
-              dav_access      user:rw group:rw all:r;
-            '';
-          };
+        "~ ^/dufs/(\\w+|__dufs.*)(\\/.*)?$" = {
+          # exclude both ".."-style enumeration attacks and access to ".skeleton", ".hot-spare-*" etc.,
+          # but allow dufs to load its assets
+          proxyPass = "http://127.0.0.1:5000/dufs/$1$2";
+          extraConfig = ''
+            expires epoch;
+            add_header X-Robots-Tag "noindex, follow" always;
+            dav_methods     PUT DELETE MKCOL COPY MOVE;
+            dav_ext_methods PROPFIND OPTIONS;
+            dav_access      user:rw group:rw all:r;
+          '';
+        };
       };
     };
   };
@@ -286,133 +300,153 @@ in {
   # # required so nginx can serve /dufs/foo/bar.scm
   # systemd.services.nginx.serviceConfig.ProtectHome = "no";
 
-  containers = let
-    # config shared by xskeleton and ttyskeleton
-    sharedContainerConfig = {
-      ephemeral = true;
-      privateNetwork = true;
-      bindMounts = {
-        "/home/guest" = {
-          hostPath = "/home/.skeleton";
-          isReadOnly = false;
-        };
-      };
-      extraFlags = [ "--setenv=MINLOGPAD_SESSION_NAME=__SESSION_NAME__" ];
-    };
-    # config shared by xskeleton and ttyskeleton
-    sharedSystemConfig = { config, pkgs, ... }: {
-      services.journald.extraConfig = ''
-        Storage=volatile
-        RuntimeMaxUse=1M
-      '';
-
-      # use shared nix store
-      systemd.tmpfiles.rules = [
-        "L+ /home/guest/examples - - - - ${minlog}/share/doc/minlog/examples"
-        "d /home/guest/doc/ 0750 guest guest - -"
-        "L+ /home/guest/doc/tutor.pdf - - - - ${minlog}/share/doc/minlog/tutor.pdf"
-        "L+ /home/guest/doc/ref.pdf - - - - ${minlog}/share/doc/minlog/ref.pdf"
-      ]
-      # share e.g. .emacs with all sessions
-      # changes to .emacs will therefore affect old sessions as well
-        ++ (map (path:
-          let deriv = ../backend/skeleton-home-shared ++ "/${path}";
-          in "L+ /home/guest/${path} - - - - ${minlogpad-backend}/skeleton-home-shared/${path}")
-          (builtins.attrNames
-            (builtins.readDir ../backend/skeleton-home-shared)));
-
-      time.hardwareClockInLocalTime = true;
-
-      networking.hostName = "ada";
-      networking.firewall.enable = false;
-
-      programs.bash.enableCompletion = false;
-
-      environment.systemPackages = with pkgs; [ chez ];
-
-      users.groups.guest = { gid = 994; };
-      users.users.guest = {
-        isSystemUser = true;
-        group = "guest";
-        description = "Guest";
-        home = "/home/guest";
-        uid = 995;
-      };
-
-      documentation.doc.enable = false;
-
-      system.stateVersion = "23.05";
-    };
-  in {
-    ttyskeleton = sharedContainerConfig // {
-      config = { config, pkgs, ... }: {
-        imports = [ sharedSystemConfig ];
-        environment.systemPackages = with pkgs; [
-          bash
-          perl
-          tmux
-          vim
-          emacsWithMinlogNoX
-        ];
-      };
-    };
-    xskeleton = sharedContainerConfig // {
-      config = { config, pkgs, ... }: {
-        imports = [ sharedSystemConfig ];
-        hardware.pulseaudio.enable = true;
-
-        environment.systemPackages = with pkgs; [
-          tigervnc
-          emacsWithMinlog
-          screenkey
-          st
-          mydwm
-          netcat
-          xosd
-        ];
-
-        fonts.fontconfig.enable = true;
-        fonts.packages = with pkgs; [ hack-font ubuntu_font_family ];
-
-        services.xserver = {
-          enable = true;
-          displayManager.startx.enable = true;
-        };
-
-        systemd.services.vnc = {
-          wantedBy = [ "multi-user.target" ];
-          description = "vnc";
-          serviceConfig = {
-            User = "guest";
-            ExecStart = "${minlogpad-backend}/vncinit.sh";
+  containers =
+    let
+      # config shared by xskeleton and ttyskeleton
+      sharedContainerConfig = {
+        ephemeral = true;
+        privateNetwork = true;
+        bindMounts = {
+          "/home/guest" = {
+            hostPath = "/home/.skeleton";
+            isReadOnly = false;
           };
-          postStop = "${minlogpad-backend}/vncdown.sh";
-          path = with pkgs; [
-            bash
-            util-linux
-            xorg.xauth
-            tigervnc
-            screenkey
-            netcat
-            coreutils
-            mydwm
-            emacsWithMinlog
-          ];
         };
+        extraFlags = [ "--setenv=MINLOGPAD_SESSION_NAME=__SESSION_NAME__" ];
+      };
+      # config shared by xskeleton and ttyskeleton
+      sharedSystemConfig =
+        { config, pkgs, ... }:
+        {
+          services.journald.extraConfig = ''
+            Storage=volatile
+            RuntimeMaxUse=1M
+          '';
 
-        systemd.paths.poweroff = {
-          wantedBy = [ "multi-user.target" ];
-          description = "poweroff after VNC logout";
-          pathConfig = { PathExists = "/tmp/poweroff"; };
-        };
+          # use shared nix store
+          systemd.tmpfiles.rules =
+            [
+              "L+ /home/guest/examples - - - - ${minlog}/share/doc/minlog/examples"
+              "d /home/guest/doc/ 0750 guest guest - -"
+              "L+ /home/guest/doc/tutor.pdf - - - - ${minlog}/share/doc/minlog/tutor.pdf"
+              "L+ /home/guest/doc/ref.pdf - - - - ${minlog}/share/doc/minlog/ref.pdf"
+            ]
+            # share e.g. .emacs with all sessions
+            # changes to .emacs will therefore affect old sessions as well
+            ++ (map (
+              path:
+              let
+                deriv = ../backend/skeleton-home-shared ++ "/${path}";
+              in
+              "L+ /home/guest/${path} - - - - ${minlogpad-backend}/skeleton-home-shared/${path}"
+            ) (builtins.attrNames (builtins.readDir ../backend/skeleton-home-shared)));
 
-        systemd.services.poweroff = {
-          description = "poweroff after VNC logout";
-          serviceConfig = { ExecStart = "${pkgs.systemd}/bin/poweroff"; };
+          time.hardwareClockInLocalTime = true;
+
+          networking.hostName = "ada";
+          networking.firewall.enable = false;
+
+          programs.bash.enableCompletion = false;
+
+          environment.systemPackages = with pkgs; [ chez ];
+
+          users.groups.guest = {
+            gid = 994;
+          };
+          users.users.guest = {
+            isSystemUser = true;
+            group = "guest";
+            description = "Guest";
+            home = "/home/guest";
+            uid = 995;
+          };
+
+          documentation.doc.enable = false;
+
+          system.stateVersion = "23.05";
         };
+    in
+    {
+      ttyskeleton = sharedContainerConfig // {
+        config =
+          { config, pkgs, ... }:
+          {
+            imports = [ sharedSystemConfig ];
+            environment.systemPackages = with pkgs; [
+              bash
+              perl
+              tmux
+              vim
+              emacsWithMinlogNoX
+            ];
+          };
+      };
+      xskeleton = sharedContainerConfig // {
+        config =
+          { config, pkgs, ... }:
+          {
+            imports = [ sharedSystemConfig ];
+            hardware.pulseaudio.enable = true;
+
+            environment.systemPackages = with pkgs; [
+              tigervnc
+              emacsWithMinlog
+              screenkey
+              st
+              mydwm
+              netcat
+              xosd
+            ];
+
+            fonts.fontconfig.enable = true;
+            fonts.packages = with pkgs; [
+              hack-font
+              ubuntu_font_family
+            ];
+
+            services.xserver = {
+              enable = true;
+              displayManager.startx.enable = true;
+            };
+
+            systemd.services.vnc = {
+              wantedBy = [ "multi-user.target" ];
+              description = "vnc";
+              serviceConfig = {
+                User = "guest";
+                ExecStart = "${minlogpad-backend}/vncinit.sh";
+              };
+              postStop = "${minlogpad-backend}/vncdown.sh";
+              path = with pkgs; [
+                bash
+                util-linux
+                xorg.xauth
+                tigervnc
+                screenkey
+                netcat
+                coreutils
+                mydwm
+                emacsWithMinlog
+              ];
+            };
+
+            systemd.paths.poweroff = {
+              wantedBy = [ "multi-user.target" ];
+              description = "poweroff after VNC logout";
+              pathConfig = {
+                PathExists = "/tmp/poweroff";
+              };
+            };
+
+            systemd.services.poweroff = {
+              description = "poweroff after VNC logout";
+              serviceConfig = {
+                ExecStart = "${pkgs.systemd}/bin/poweroff";
+              };
+            };
+          };
       };
     };
-  };
 
   documentation.doc.enable = false;
 
