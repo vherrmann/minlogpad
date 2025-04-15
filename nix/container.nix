@@ -60,11 +60,6 @@ in
   # system information.
   boot.isContainer = true;
 
-  # When creating an lxc image using a command like `nixos-generate -c container.nix -f lxc`,
-  # the file nixos/virtualisation/lxc-container.nix is included, thereby
-  # enabling this option. We require it to be false, though.
-  environment.noXlibs = false;
-
   systemd.services.dufs = {
     description = "dufs";
     wantedBy = [ "multi-user.target" ];
@@ -346,7 +341,7 @@ in
           networking.hostName = "ada";
           networking.firewall.enable = false;
 
-          programs.bash.enableCompletion = false;
+          programs.bash.completion.enable = false;
 
           environment.systemPackages = with pkgs; [ chez ];
 
@@ -386,7 +381,7 @@ in
           { config, pkgs, ... }:
           {
             imports = [ sharedSystemConfig ];
-            hardware.pulseaudio.enable = true;
+            hardware.pulseaudio.enable = false;
 
             environment.systemPackages = with pkgs; [
               tigervnc
