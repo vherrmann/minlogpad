@@ -35,6 +35,10 @@
 
 ;; C-z              undo
 ;; C-Z              redo
+;; C-SPC            mark current position
+;; C-w              cut
+;; M-w              copy
+;; C-Y              paste
 ;; M-o              toggle Vi keybindings
 ;; C-x C-+          increase font size
 ;; M-x              execute command
