@@ -21,11 +21,11 @@
     "minlogSrc": {
       "flake": false,
       "locked": {
-        "lastModified": 1712649790,
-        "narHash": "sha256-juosLQdH80rF5OtSq+5TgbPCzn5EWM4SDmMK7WARKbg=",
+        "lastModified": 1748351947,
+        "narHash": "sha256-A96UDcNNZFj/wUTRPVDedUATdgLzJY77cDNywQd7k9w=",
         "ref": "dev",
-        "rev": "a760d5f65db18d29b435d871e42246ea3b21e41a",
-        "revCount": 735,
+        "rev": "e5025316527bc2caf0fa6e694ac4706f5546e5dc",
+        "revCount": 787,
         "type": "git",
         "url": "https://www.math.lmu.de/~minlogit/git/minlog.git"
       },
